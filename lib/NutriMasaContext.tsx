@@ -24,13 +24,19 @@ interface NutriMasaContextType {
   selectedUsuario: Usuario | null;
   selectedUsuarioId: string;
   setSelectedUsuarioId: (id: string) => void;
+  
+  // Paciente activo en la App Móvil
+  activePatientId: string;
+  setActivePatientId: (id: string) => void;
+  activePatient: Usuario | null;
+
   mensajes: MensajeChat[];
   articulos: ArticuloEducativo[];
   reportes: Reporte[];
   activeTab: 'usuarios' | 'mensajes' | 'reportes' | 'biblioteca';
   setActiveTab: (tab: 'usuarios' | 'mensajes' | 'reportes' | 'biblioteca') => void;
   
-  // Modals & Panels
+  // Modales
   isDetailModalOpen: boolean;
   setIsDetailModalOpen: (open: boolean) => void;
   isAdjustModalOpen: boolean;
@@ -42,7 +48,7 @@ interface NutriMasaContextType {
   isReportModalOpen: boolean;
   setIsReportModalOpen: (open: boolean) => void;
   
-  // Actions
+  // Acciones
   updatePlan: (data: {
     usuarioId: string;
     superavit_kcal: number;
@@ -52,6 +58,9 @@ interface NutriMasaContextType {
     motivo: string;
   }) => void;
   enviarMensaje: (texto: string, tipo?: MensajeChat['tipo'], usuarioId?: string) => void;
+  enviarMensajePaciente: (texto: string, usuarioId?: string) => void;
+  agregarRegistroDiario: (usuarioId: string, registro: Omit<RegistroDiario, 'id' | 'usuario_id'>) => void;
+  actualizarElegibilidad: (usuarioId: string, datos: Partial<Usuario>) => void;
   toggleArticuloVisibility: (articuloId: string) => void;
   agregarArticulo: (articulo: Omit<ArticuloEducativo, 'id' | 'creado_en'>) => void;
   generarReporte: (reporte: Omit<Reporte, 'id' | 'creado_en' | 'nutriologo_id'>) => Reporte;
@@ -65,13 +74,14 @@ interface NutriMasaContextType {
 
 const NutriMasaContext = createContext<NutriMasaContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'nutrimasa_state_v1';
+const STORAGE_KEY = 'nutrimasa_state_v2';
 
 export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [nutriologo, setNutriologo] = useState<Nutriologo | null>(INITIAL_NUTRIOLOGO);
   const [usuarios, setUsuarios] = useState<Usuario[]>(INITIAL_USUARIOS);
-  const [selectedUsuarioId, setSelectedUsuarioId] = useState<string>('usr-02'); // Usuario 02 as in Figure 8
+  const [selectedUsuarioId, setSelectedUsuarioId] = useState<string>('usr-02');
+  const [activePatientId, setActivePatientId] = useState<string>('usr-02');
   const [mensajes, setMensajes] = useState<MensajeChat[]>(INITIAL_MENSAJES);
   const [articulos, setArticulos] = useState<ArticuloEducativo[]>(INITIAL_ARTICULOS);
   const [reportes, setReportes] = useState<Reporte[]>(INITIAL_REPORTES);
@@ -96,6 +106,7 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           if (parsed.articulos) setArticulos(parsed.articulos);
           if (parsed.reportes) setReportes(parsed.reportes);
           if (parsed.selectedUsuarioId) setSelectedUsuarioId(parsed.selectedUsuarioId);
+          if (parsed.activePatientId) setActivePatientId(parsed.activePatientId);
         }
       } catch (e) {
         console.error('Error cargando estado guardado:', e);
@@ -113,15 +124,82 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           articulos,
           reportes,
           selectedUsuarioId,
+          activePatientId,
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
       } catch (e) {
         console.error('Error guardando estado:', e);
       }
     }
-  }, [usuarios, mensajes, articulos, reportes, selectedUsuarioId]);
+  }, [usuarios, mensajes, articulos, reportes, selectedUsuarioId, activePatientId]);
 
   const selectedUsuario = usuarios.find((u) => u.id === selectedUsuarioId) || usuarios[0] || null;
+  const activePatient = usuarios.find((u) => u.id === activePatientId) || usuarios[0] || null;
+
+  // Registrar un nuevo día desde la vista móvil del paciente y actualizar métricas dinámicamente
+  const agregarRegistroDiario = (
+    usuarioId: string,
+    registroData: Omit<RegistroDiario, 'id' | 'usuario_id'>
+  ) => {
+    const nuevoRegistro: RegistroDiario = {
+      ...registroData,
+      id: `reg-${Date.now()}`,
+      usuario_id: usuarioId,
+    };
+
+    setUsuarios((prevUsuarios) =>
+      prevUsuarios.map((user) => {
+        if (user.id !== usuarioId) return user;
+
+        const registrosActuales = user.registros || [];
+        const ultRegPrevio = registrosActuales[registrosActuales.length - 1];
+
+        // Comparar progresión de cargas
+        let tendencia = user.tendencia_cargas;
+        if (ultRegPrevio) {
+          const sentadillaSubio = nuevoRegistro.sentadilla_kg > ultRegPrevio.sentadilla_kg;
+          const bancaSubio = nuevoRegistro.press_banca_kg > ultRegPrevio.press_banca_kg;
+          const sentadillaBajo = nuevoRegistro.sentadilla_kg < ultRegPrevio.sentadilla_kg;
+
+          if (sentadillaSubio || bancaSubio) {
+            tendencia = 'Suben';
+          } else if (sentadillaBajo) {
+            tendencia = 'Bajan';
+          } else {
+            tendencia = 'Sin cambio';
+          }
+        }
+
+        // Evaluar estado clínico
+        let nuevoEstado = user.estado;
+        const pesoSubio = nuevoRegistro.peso_ayunas > user.peso_actual;
+        if (pesoSubio && tendencia === 'Sin cambio') {
+          nuevoEstado = 'Peso sube, cargas no';
+        } else if (tendencia === 'Suben') {
+          nuevoEstado = 'En progreso';
+        } else if (tendencia === 'Sin cambio' && !pesoSubio) {
+          nuevoEstado = 'Estancado';
+        }
+
+        // Recalcular dinámicamente según el nuevo peso en ayunas
+        const nuevoPeso = nuevoRegistro.peso_ayunas;
+
+        return {
+          ...user,
+          peso_actual: nuevoPeso,
+          tendencia_cargas: tendencia,
+          estado: nuevoEstado,
+          registros: [...registrosActuales, nuevoRegistro],
+        };
+      })
+    );
+  };
+
+  const actualizarElegibilidad = (usuarioId: string, datos: Partial<Usuario>) => {
+    setUsuarios((prev) =>
+      prev.map((u) => (u.id === usuarioId ? { ...u, ...datos } : u))
+    );
+  };
 
   const updatePlan = ({
     usuarioId,
@@ -147,7 +225,6 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           (nuevasCaloriasTotales - proteina_g_kg * user.peso_actual * 4 - grasas_g * 9) / 4
         );
 
-        // Si se ajusta el superávit y las cargas estaban estancadas, podemos marcar un nuevo estado
         let nuevoEstado = user.estado;
         if (user.estado === 'Estancado') {
           nuevoEstado = 'En progreso';
@@ -168,7 +245,6 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       })
     );
 
-    // Registrar notificación en el chat asíncrono como lo hace el sistema en el PDF
     const nuevoMensaje: MensajeChat = {
       id: `msg-${Date.now()}`,
       usuario_id: usuarioId,
@@ -206,6 +282,24 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setMensajes((prev) => [...prev, nuevoMensaje]);
   };
 
+  const enviarMensajePaciente = (texto: string, usuarioId?: string) => {
+    const target = usuarioId || activePatientId;
+    if (!texto.trim() || !target) return;
+
+    const nuevoMensaje: MensajeChat = {
+      id: `msg-${Date.now()}`,
+      usuario_id: target,
+      nutriologo_id: nutriologo?.id || 'nut-01',
+      remitente: 'usuario',
+      tipo: 'texto',
+      contenido: texto,
+      leido: false,
+      creado_en: new Date().toISOString().replace('T', ' ').slice(0, 19),
+    };
+
+    setMensajes((prev) => [...prev, nuevoMensaje]);
+  };
+
   const toggleArticuloVisibility = (articuloId: string) => {
     setArticulos((prev) =>
       prev.map((art) => (art.id === articuloId ? { ...art, visible_en_app: !art.visible_en_app } : art))
@@ -233,12 +327,9 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const login = (email: string, role: 'nutriologo' | 'usuario') => {
-    if (role === 'nutriologo') {
-      setIsAuthenticated(true);
-      setNutriologo(INITIAL_NUTRIOLOGO);
-      return true;
-    }
-    return false;
+    setIsAuthenticated(true);
+    setNutriologo(INITIAL_NUTRIOLOGO);
+    return true;
   };
 
   const logout = () => {
@@ -251,8 +342,11 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setArticulos(INITIAL_ARTICULOS);
     setReportes(INITIAL_REPORTES);
     setSelectedUsuarioId('usr-02');
+    setActivePatientId('usr-02');
+    setNutriologo(INITIAL_NUTRIOLOGO);
     if (typeof window !== 'undefined') {
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem('nutrimasa_state_v1');
     }
   };
 
@@ -264,6 +358,9 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         selectedUsuario,
         selectedUsuarioId,
         setSelectedUsuarioId,
+        activePatientId,
+        setActivePatientId,
+        activePatient,
         mensajes,
         articulos,
         reportes,
@@ -281,6 +378,9 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setIsReportModalOpen,
         updatePlan,
         enviarMensaje,
+        enviarMensajePaciente,
+        agregarRegistroDiario,
+        actualizarElegibilidad,
         toggleArticuloVisibility,
         agregarArticulo,
         generarReporte,

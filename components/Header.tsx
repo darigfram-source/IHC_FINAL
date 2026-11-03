@@ -7,11 +7,11 @@ import {
   Activity,
   AlertTriangle,
   Award,
-  Calendar,
   CheckCircle2,
-  Dumbbell,
-  Search,
+  Smartphone,
+  ExternalLink,
 } from 'lucide-react';
+import Link from 'next/link';
 
 export const Header: React.FC = () => {
   const { activeTab, usuarios, nutriologo } = useNutriMasa();
@@ -56,7 +56,7 @@ export const Header: React.FC = () => {
         <p className="text-xs text-slate-500 hidden sm:block">{subtitle}</p>
       </div>
 
-      {/* Métricas Rápidas (KPIs para el Especialista) */}
+      {/* Métricas Rápidas (KPIs para el Especialista) y Switcher de rol */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs">
           <span className="text-slate-500 font-medium">Pacientes:</span>
@@ -73,11 +73,22 @@ export const Header: React.FC = () => {
           </span>
         </div>
 
-        {/* Institución / Especialidad */}
-        <div className="hidden lg:flex items-center gap-2 bg-emerald-50 text-emerald-900 border border-emerald-200/80 px-3 py-1.5 rounded-lg text-xs">
+        {/* Especialidad clínica */}
+        <div className="hidden lg:flex items-center gap-2 bg-emerald-50 text-emerald-900 border border-emerald-200/80 px-3 py-1.5 rounded-lg text-xs font-semibold">
           <Award className="w-3.5 h-3.5 text-emerald-700" />
-          <span className="font-semibold">{nutriologo?.institucion || 'UdeG CUCEI'}</span>
+          <span>Nutrición Deportiva e Hipertrofia</span>
         </div>
+
+        {/* Switcher a Vista Móvil del Paciente */}
+        <Link
+          href="/app"
+          className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs"
+        >
+          <Smartphone className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Vista Paciente (Móvil)</span>
+          <span className="sm:hidden">App</span>
+          <ExternalLink className="w-3 h-3 opacity-70 ml-0.5" />
+        </Link>
       </div>
     </header>
   );

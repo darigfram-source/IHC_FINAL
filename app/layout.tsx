@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'NutriMasa | Panel del Nutriólogo Deportivo',
-  description: 'Plataforma web de supervisión nutricional e hipertrofia para nutriólogos certificados. UdeG CUCEI.',
+  description: 'Plataforma web de supervisión nutricional e hipertrofia para nutriólogos certificados. Plataforma Integral Especialista y Paciente.',
 };
 
 export default function RootLayout({

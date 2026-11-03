@@ -1,15 +1,15 @@
 // ============================================================================
 // DATOS INICIALES REALISTAS PARA NUTRIMASA
-// Basado en el maquetado y especificaciones de la propuesta UdeG CUCEI
+// Basado en el maquetado y especificaciones de NutriMasa
 // ============================================================================
 import { Nutriologo, Usuario, RegistroDiario, MensajeChat, ArticuloEducativo, Reporte } from '../types';
 
 export const INITIAL_NUTRIOLOGO: Nutriologo = {
   id: 'nut-01',
-  nombre: 'Lic. Jovan Ricardo Zepeda',
-  email: 'nutriologo@nutrimasa.com',
-  cedula_profesional: 'CED-PROF-894721',
-  institucion: 'Universidad de Guadalajara (CUCEI)',
+  nombre: 'Nutriólogo Admin',
+  email: 'admin@nutrimasa.com',
+  cedula_profesional: 'CED-ADMIN-001',
+  institucion: 'NutriMasa Pro Clinic',
   especialidad: 'Nutrición Deportiva e Hipertrofia Muscular',
 };
 
@@ -212,15 +212,15 @@ export const INITIAL_USUARIOS: Usuario[] = [
   {
     id: 'usr-01',
     nutriologo_id: 'nut-01',
-    nombre: 'Usuario 01', // Exact name format from Figure 8
-    email: 'alan.salazar@alumnos.udg.mx',
+    nombre: 'Usuario 01',
+    email: 'alan.salazar@nutrimasa.com',
     edad: 24,
     estatura_cm: 178,
     peso_inicial: 76.5,
-    peso_actual: 78.4, // Matches Figure 8
+    peso_actual: 78.4,
     peso_objetivo: 82.0,
     nivel_entrenamiento: 'Intermedio',
-    proteina_g_kg: 1.70, // 133g/día
+    proteina_g_kg: 1.70,
     superavit_kcal: 450,
     calorias_mantenimiento: 2400,
     calorias_totales: 2850,
@@ -228,8 +228,8 @@ export const INITIAL_USUARIOS: Usuario[] = [
     carbs_peri_entreno_g: 80,
     grasas_g: 75,
     suplementacion_sugerida: 'Creatina monohidratada 5g/día constante',
-    estado: 'En progreso', // Matches Figure 8
-    tendencia_cargas: 'Suben', // Matches Figure 8
+    estado: 'En progreso',
+    tendencia_cargas: 'Suben',
     condicion_renal_diabetes: false,
     embarazo_lactancia: false,
     trastorno_conducta_alimentaria: false,
@@ -240,15 +240,15 @@ export const INITIAL_USUARIOS: Usuario[] = [
   {
     id: 'usr-02',
     nutriologo_id: 'nut-01',
-    nombre: 'Usuario 02', // Matches Figure 8 right panel
-    email: 'dario.fuentes@alumnos.udg.mx',
+    nombre: 'Usuario 02',
+    email: 'dario.fuentes@nutrimasa.com',
     edad: 24,
     estatura_cm: 175,
     peso_inicial: 70.8,
-    peso_actual: 71.0, // Matches Figure 8
+    peso_actual: 71.0,
     peso_objetivo: 75.0,
     nivel_entrenamiento: 'Intermedio',
-    proteina_g_kg: 1.75, // 124g/día
+    proteina_g_kg: 1.75,
     superavit_kcal: 400,
     calorias_mantenimiento: 2300,
     calorias_totales: 2700,
@@ -256,8 +256,8 @@ export const INITIAL_USUARIOS: Usuario[] = [
     carbs_peri_entreno_g: 70,
     grasas_g: 68,
     suplementacion_sugerida: 'Creatina monohidratada 5g/día, concentrar carbohidratos pre-entreno',
-    estado: 'Estancado', // Matches Figure 8
-    tendencia_cargas: 'Sin cambio', // Matches Figure 8
+    estado: 'Estancado',
+    tendencia_cargas: 'Sin cambio',
     condicion_renal_diabetes: false,
     embarazo_lactancia: false,
     trastorno_conducta_alimentaria: false,
@@ -268,12 +268,12 @@ export const INITIAL_USUARIOS: Usuario[] = [
   {
     id: 'usr-03',
     nutriologo_id: 'nut-01',
-    nombre: 'Usuario 03', // Matches Figure 8
+    nombre: 'Usuario 03',
     email: 'carlos.mendoza@gymmail.com',
     edad: 27,
     estatura_cm: 180,
     peso_inicial: 81.0,
-    peso_actual: 84.2, // Matches Figure 8
+    peso_actual: 84.2,
     peso_objetivo: 85.0,
     nivel_entrenamiento: 'Principiante',
     proteina_g_kg: 1.65,
@@ -284,8 +284,8 @@ export const INITIAL_USUARIOS: Usuario[] = [
     carbs_peri_entreno_g: 90,
     grasas_g: 78,
     suplementacion_sugerida: 'Ajustar superávit hacia abajo para evitar acúmulo excesivo de grasa',
-    estado: 'Peso sube, cargas no', // Matches Figure 8
-    tendencia_cargas: 'Sin cambio', // Matches Figure 8
+    estado: 'Peso sube, cargas no',
+    tendencia_cargas: 'Sin cambio',
     condicion_renal_diabetes: false,
     embarazo_lactancia: false,
     trastorno_conducta_alimentaria: false,
@@ -297,7 +297,7 @@ export const INITIAL_USUARIOS: Usuario[] = [
     id: 'usr-04',
     nutriologo_id: 'nut-01',
     nombre: 'Usuario 04',
-    email: 'mariana.flores@cucei.udg.mx',
+    email: 'mariana.flores@nutrimasa.com',
     edad: 22,
     estatura_cm: 164,
     peso_inicial: 59.0,
@@ -387,7 +387,7 @@ export const INITIAL_MENSAJES: MensajeChat[] = [
     usuario_id: 'usr-01',
     nutriologo_id: 'nut-01',
     remitente: 'usuario',
-    contenido: '¡Hola Lic.! Logré subir a 120kg en sentadilla esta semana y mi peso en ayunas marcó 78.4kg.',
+    contenido: '¡Hola! Logré subir a 120kg en sentadilla esta semana y mi peso en ayunas marcó 78.4kg.',
     tipo: 'texto',
     leido: false,
     creado_en: '2026-11-03 08:30:00',

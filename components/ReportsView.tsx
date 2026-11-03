@@ -197,7 +197,7 @@ export const ReportsView: React.FC = () => {
               </span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Universidad de Guadalajara • Centro Universitario de Ciencias Exactas e Ingenierías (CUCEI)
+              NutriMasa Sports Performance • Clínica de Nutrición Especializada
             </p>
             <p className="text-[11px] text-slate-400">
               Programa de Nutrición Deportiva Supervisada para Hipertrofia Muscular
@@ -352,7 +352,7 @@ export const ReportsView: React.FC = () => {
 
           <div className="text-center w-56">
             <div className="border-b border-slate-400 pb-1 mb-1 font-serif italic text-emerald-800 text-sm">
-              Lic. Jovan R. Zepeda G.
+              Nutriólogo Admin
             </div>
             <p className="text-xs font-bold text-slate-800">{nutriologo?.nombre}</p>
             <p className="text-[10px] text-slate-500">{nutriologo?.cedula_profesional}</p>

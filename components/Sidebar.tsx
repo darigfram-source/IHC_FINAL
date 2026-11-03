@@ -11,14 +11,15 @@ import {
   ShieldCheck,
   LogOut,
   RotateCcw,
-  Sparkles,
+  Smartphone,
+  ExternalLink,
 } from 'lucide-react';
+import Link from 'next/link';
 
 export const Sidebar: React.FC = () => {
   const {
     activeTab,
     setActiveTab,
-    nutriologo,
     logout,
     resetToInitial,
     setIsLegalModalOpen,
@@ -52,14 +53,20 @@ export const Sidebar: React.FC = () => {
             <p className="text-[11px] text-emerald-300/80 font-medium">Panel del Especialista</p>
           </div>
         </div>
+      </div>
 
-        {/* Institución académica CUCEI UdeG */}
-        <div className="mt-3.5 pt-2.5 border-t border-[#1a4433] flex items-center justify-between text-[11px] text-emerald-200/60 font-medium">
-          <span>UdeG • CUCEI</span>
-          <span className="text-emerald-400/80 text-[10px] bg-emerald-900/40 px-2 py-0.5 rounded border border-emerald-700/30">
-            IHC 2026
-          </span>
-        </div>
+      {/* Switcher Rápido a Vista Paciente */}
+      <div className="p-3 bg-[#0d221a] border-b border-[#16382a]">
+        <Link
+          href="/app"
+          className="w-full flex items-center justify-between px-3 py-2 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/30 rounded-lg text-xs font-bold text-emerald-200 transition-all group"
+        >
+          <div className="flex items-center gap-2">
+            <Smartphone className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+            <span>Vista Paciente (Móvil)</span>
+          </div>
+          <ExternalLink className="w-3.5 h-3.5 text-emerald-400/70" />
+        </Link>
       </div>
 
       {/* Navigation Sections */}
@@ -68,7 +75,7 @@ export const Sidebar: React.FC = () => {
           Panel
         </div>
 
-        {/* 1. Usuarios (Principal según maquetado Figura 8) */}
+        {/* 1. Usuarios */}
         <button
           onClick={() => setActiveTab('usuarios')}
           className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
@@ -127,7 +134,7 @@ export const Sidebar: React.FC = () => {
             <FileText className="w-4 h-4" />
             <span>Reportes</span>
           </div>
-          <span className="text-[10px] text-emerald-300/40">PDF</span>
+          <span className="text-[10px] text-emerald-300/40 font-semibold">PDF</span>
         </button>
 
         {/* 4. Biblioteca */}
@@ -159,18 +166,18 @@ export const Sidebar: React.FC = () => {
         </button>
       </div>
 
-      {/* Footer del Nutriólogo */}
+      {/* Footer del Nutriólogo (Actualizado a Nutriólogo Admin y CED-ADMIN-001) */}
       <div className="p-3.5 border-t border-[#16382a] bg-[#0c1f18]">
         <div className="flex items-center gap-3 mb-3 p-2 bg-[#122e23] rounded-lg border border-[#1b4333]">
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-400/30">
-            JZ
+            AD
           </div>
           <div className="overflow-hidden">
             <p className="text-xs font-semibold text-white truncate">
-              {nutriologo?.nombre || 'Lic. Jovan Zepeda'}
+              Nutriólogo Admin
             </p>
             <p className="text-[10px] text-emerald-300/70 truncate">
-              {nutriologo?.cedula_profesional || 'Céd. 894721'}
+              Céd. CED-ADMIN-001
             </p>
           </div>
         </div>

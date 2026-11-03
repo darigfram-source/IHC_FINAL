@@ -1,6 +1,6 @@
 // ============================================================================
 // TIPOS DE DATOS: NUTRIMASA
-// Basado en el documento de propuesta académica (CUCEI - UdeG)
+// Basado en el documento de propuesta académica NutriMasa Pro
 // ============================================================================
 
 export type EstadoPaciente = 'En progreso' | 'Estancado' | 'Peso sube, cargas no';

@@ -2,22 +2,23 @@
 
 import React, { useState } from 'react';
 import { useNutriMasa } from '@/lib/NutriMasaContext';
-import { Dumbbell, ShieldCheck, Lock, Mail, ArrowRight, UserCheck } from 'lucide-react';
+import { Dumbbell, ShieldCheck, Lock, Mail, ArrowRight, UserCheck, Smartphone } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export const LoginView: React.FC = () => {
   const { login, setIsLegalModalOpen } = useNutriMasa();
+  const router = useRouter();
 
   const [role, setRole] = useState<'nutriologo' | 'usuario'>('nutriologo');
-  const [email, setEmail] = useState('nutriologo@nutrimasa.com');
+  const [email, setEmail] = useState('admin@nutrimasa.com');
   const [password, setPassword] = useState('12345678');
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (role === 'usuario') {
-      setErrorMsg(
-        'El acceso de pacientes se realiza exclusivamente a través de la aplicación móvil (Android/iOS). Este portal web de escritorio es exclusivo para el panel del Nutriólogo.'
-      );
+      router.push('/app');
       return;
     }
 
@@ -28,7 +29,7 @@ export const LoginView: React.FC = () => {
   };
 
   const handleDemoLogin = () => {
-    login('nutriologo@nutrimasa.com', 'nutriologo');
+    login('admin@nutrimasa.com', 'nutriologo');
   };
 
   return (
@@ -41,11 +42,8 @@ export const LoginView: React.FC = () => {
           </div>
           <h1 className="text-2xl font-black tracking-tight text-white">NutriMasa</h1>
           <p className="text-xs text-emerald-300/80 font-medium mt-1">
-            Nutrición para ganar masa muscular, con tu nutriólogo
+            Plataforma de Nutrición Deportiva e Hipertrofia Supervisada
           </p>
-          <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-900/50 border border-emerald-700/40 text-[10px] text-emerald-300 font-semibold">
-            <span>Universidad de Guadalajara • CUCEI</span>
-          </div>
         </div>
 
         {/* Selector de Rol (Figura 1: "Soy usuario" / "Soy nutriólogo") */}
@@ -57,13 +55,14 @@ export const LoginView: React.FC = () => {
                 setRole('usuario');
                 setErrorMsg('');
               }}
-              className={`flex-1 py-2 rounded-lg transition-all ${
+              className={`flex-1 py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
                 role === 'usuario'
-                  ? 'bg-white text-slate-800 shadow-xs'
+                  ? 'bg-emerald-600 text-white shadow-xs font-bold'
                   : 'text-slate-500 hover:text-slate-800'
               }`}
             >
-              Soy usuario
+              <Smartphone className="w-3.5 h-3.5" />
+              <span>Soy paciente</span>
             </button>
             <button
               type="button"
@@ -81,29 +80,34 @@ export const LoginView: React.FC = () => {
             </button>
           </div>
 
-          {/* Advertencia si selecciona usuario */}
+          {/* Opción Paciente */}
           {role === 'usuario' ? (
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-3 mb-4">
-              <p className="font-bold">Acceso Móvil para Pacientes</p>
-              <p className="leading-relaxed text-amber-800">
-                Los registros diarios de peso en ayunas y progresión de cargas se completan desde la aplicación para Android e iOS.
-              </p>
-              <p className="text-slate-500">
-                Para acceder al <strong>Panel Web del Especialista</strong>, selecciona la pestaña <em>&quot;Soy nutriólogo&quot;</em>.
-              </p>
-              <button
-                type="button"
-                onClick={() => setRole('nutriologo')}
-                className="w-full py-2 bg-emerald-700 text-white font-bold rounded-lg hover:bg-emerald-800 text-xs"
+            <div className="p-5 bg-emerald-50/70 border border-emerald-200 rounded-2xl text-xs text-emerald-950 space-y-4 mb-2">
+              <div>
+                <p className="font-extrabold text-sm text-emerald-900">App del Paciente (Vista Móvil)</p>
+                <p className="leading-relaxed text-emerald-800 text-xs mt-1">
+                  Accede a tu registro diario en menos de 30 segundos, consulta tus gráficas de sobrecarga progresiva y comunícate con tu especialista.
+                </p>
+              </div>
+
+              <Link
+                href="/app"
+                className="w-full py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs"
               >
-                Cambiar a &quot;Soy nutriólogo&quot;
-              </button>
+                <Smartphone className="w-4 h-4" />
+                <span>Abrir App Móvil del Paciente</span>
+                <ArrowRight className="w-4 h-4 ml-1" />
+              </Link>
+
+              <p className="text-[11px] text-slate-500 text-center">
+                También puedes acceder directo en <code className="bg-white px-1.5 py-0.5 rounded border border-slate-200 font-mono text-emerald-700">/app</code>
+              </p>
             </div>
           ) : (
             <form onSubmit={handleLogin} className="space-y-4 text-xs">
               <div>
                 <label className="font-bold text-slate-700 block mb-1">
-                  Correo institucional o profesional
+                  Correo del Nutriólogo
                 </label>
                 <div className="relative">
                   <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -113,7 +117,7 @@ export const LoginView: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:ring-2 focus:ring-emerald-500 text-xs"
-                    placeholder="nutriologo@nutrimasa.com"
+                    placeholder="admin@nutrimasa.com"
                   />
                 </div>
               </div>
@@ -139,12 +143,12 @@ export const LoginView: React.FC = () => {
                 </div>
               )}
 
-              {/* Botón Principal de Entrada (Verde, igual a Figura 1) */}
+              {/* Botón Principal de Entrada */}
               <button
                 type="submit"
                 className="w-full py-3 bg-[#14532d] hover:bg-[#166534] active:bg-[#0f3d21] text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-sm"
               >
-                <span>Entrar al Panel</span>
+                <span>Entrar al Panel de Nutriólogo</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
 
@@ -155,16 +159,16 @@ export const LoginView: React.FC = () => {
                 className="w-full py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 text-xs"
               >
                 <UserCheck className="w-4 h-4 text-emerald-600" />
-                <span>Acceso Rápido con Cuenta Demo Certificada</span>
+                <span>Acceso Rápido como Nutriólogo Admin</span>
               </button>
             </form>
           )}
 
-          {/* Aviso Legal LFPDPPP (Fiel a Figura 1 y Requerimientos 12-14) */}
+          {/* Aviso Legal LFPDPPP */}
           <div className="mt-6 pt-4 border-t border-slate-100 text-center">
             <p className="text-[11px] text-slate-400 leading-relaxed">
               Los datos de peso, entrenamiento y salud son tratados como{' '}
-              <strong className="text-slate-600">datos personales sensibles</strong>.{' '}
+              <strong className="text-slate-600">datos sensibles</strong>.{' '}
               <button
                 onClick={() => setIsLegalModalOpen(true)}
                 className="text-emerald-700 font-semibold underline hover:text-emerald-900"

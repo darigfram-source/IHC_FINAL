@@ -46,7 +46,7 @@ export const ConsentModal: React.FC = () => {
               1. Identidad y Domicilio del Responsable
             </h4>
             <p>
-              El proyecto de software NutriMasa, desarrollado bajo el marco académico del Centro Universitario de Ciencias Exactas e Ingenierías (CUCEI) de la Universidad de Guadalajara, es responsable del tratamiento ético y seguro de sus datos de salud.
+              La plataforma NutriMasa Pro es responsable del tratamiento ético y seguro de sus datos de salud.
             </p>
 
             <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
