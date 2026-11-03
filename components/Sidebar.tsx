@@ -55,19 +55,7 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Switcher Rápido a Vista Paciente */}
-      <div className="p-3 bg-[#0d221a] border-b border-[#16382a]">
-        <Link
-          href="/app"
-          className="w-full flex items-center justify-between px-3 py-2 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-400/30 rounded-lg text-xs font-bold text-emerald-200 transition-all group"
-        >
-          <div className="flex items-center gap-2">
-            <Smartphone className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-            <span>Vista Paciente (Móvil)</span>
-          </div>
-          <ExternalLink className="w-3.5 h-3.5 text-emerald-400/70" />
-        </Link>
-      </div>
+
 
       {/* Navigation Sections */}
       <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">

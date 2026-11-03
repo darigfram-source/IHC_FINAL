@@ -79,16 +79,7 @@ export const Header: React.FC = () => {
           <span>Nutrición Deportiva e Hipertrofia</span>
         </div>
 
-        {/* Switcher a Vista Móvil del Paciente */}
-        <Link
-          href="/app"
-          className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs"
-        >
-          <Smartphone className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Vista Paciente (Móvil)</span>
-          <span className="sm:hidden">App</span>
-          <ExternalLink className="w-3 h-3 opacity-70 ml-0.5" />
-        </Link>
+
       </div>
     </header>
   );
