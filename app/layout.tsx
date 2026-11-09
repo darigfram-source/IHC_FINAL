@@ -20,6 +20,12 @@ export const metadata: Metadata = {
     'Supervisión nutricional exacta para hipertrofia muscular y sobrecarga progresiva. Plataforma integral adaptable para deportistas y nutriólogos.',
   applicationName: 'NutriMasa Pro',
   authors: [{ name: 'NutriMasa Team' }],
+  manifest: '/manifest.webmanifest',
+  icons: {
+    icon: '/icons/icon-192.svg',
+    shortcut: '/icons/icon-192.svg',
+    apple: '/icons/icon-192.svg',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

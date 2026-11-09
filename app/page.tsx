@@ -15,6 +15,7 @@ import {
   Beef,
   Flame,
 } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 export default function WelcomePortalPage() {
   return (
@@ -38,11 +39,12 @@ export default function WelcomePortalPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-3 text-xs">
+          <ThemeToggle variant="compact" />
           <span className="hidden sm:inline text-emerald-200/60">¿Ya tienes cuenta?</span>
           <Link
             href="/paciente/login"
-            className="px-3.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-semibold transition-all"
+            className="px-3.5 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-semibold transition-all min-h-[40px] flex items-center"
           >
             Entrar
           </Link>
