@@ -10,11 +10,12 @@ import {
   CheckCircle2,
   Smartphone,
   ExternalLink,
+  LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
 
 export const Header: React.FC = () => {
-  const { activeTab, usuarios, nutriologo } = useNutriMasa();
+  const { activeTab, usuarios, nutriologo, logout } = useNutriMasa();
 
   const totalPacientes = usuarios.length;
   const enProgreso = usuarios.filter((u) => u.estado === 'En progreso').length;
@@ -78,6 +79,16 @@ export const Header: React.FC = () => {
           <Award className="w-3.5 h-3.5 text-emerald-700" />
           <span>Nutrición Deportiva e Hipertrofia</span>
         </div>
+
+        {/* Botón Cerrar Sesión */}
+        <button
+          onClick={logout}
+          title="Cerrar sesión de especialista"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors cursor-pointer"
+        >
+          <LogOut className="w-3.5 h-3.5" />
+          <span className="hidden sm:inline">Cerrar Sesión</span>
+        </button>
 
 
       </div>

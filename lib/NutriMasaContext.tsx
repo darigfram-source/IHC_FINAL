@@ -68,7 +68,7 @@ interface NutriMasaContextType {
   // Auth
   isAuthenticated: boolean;
   login: (email: string, role: 'nutriologo' | 'usuario') => boolean;
-  logout: () => void;
+  logout: () => void | Promise<void>;
   resetToInitial: () => void;
 }
 
@@ -332,8 +332,17 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     return true;
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Error cerrando sesión en API:', e);
+    } finally {
+      setIsAuthenticated(false);
+      if (typeof window !== 'undefined') {
+        window.location.href = '/admin/login';
+      }
+    }
   };
 
   const resetToInitial = () => {

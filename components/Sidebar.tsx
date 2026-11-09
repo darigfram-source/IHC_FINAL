@@ -27,6 +27,21 @@ export const Sidebar: React.FC = () => {
     usuarios,
   } = useNutriMasa();
 
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Error al salir:', e);
+    } finally {
+      logout();
+      window.location.href = '/admin/login';
+    }
+  };
+
   // Contar mensajes no leídos del nutriólogo
   const unreadMessagesCount = mensajes.filter(
     (m) => m.remitente === 'usuario' && !m.leido
@@ -180,12 +195,13 @@ export const Sidebar: React.FC = () => {
             <span>Reiniciar demo</span>
           </button>
           <button
-            onClick={logout}
-            title="Cerrar sesión"
-            className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-rose-950/40 text-rose-300/80 hover:text-rose-200 rounded transition-colors"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            title="Cerrar sesión del especialista"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 hover:bg-rose-950/50 text-rose-300 hover:text-rose-100 rounded-lg transition-colors cursor-pointer border border-transparent hover:border-rose-900/50 min-h-[36px] disabled:opacity-50"
           >
             <LogOut className="w-3.5 h-3.5" />
-            <span>Salir</span>
+            <span>{isLoggingOut ? 'Saliendo...' : 'Salir'}</span>
           </button>
         </div>
       </div>
