@@ -14,7 +14,10 @@ import {
   Sparkles,
   Info,
   Calendar,
+  Layers,
+  FileText,
 } from 'lucide-react';
+import { PacienteTopBar } from '@/components/paciente/PacienteNavigation';
 
 export default function PacienteDiarioPage() {
   const router = useRouter();
@@ -124,221 +127,273 @@ export default function PacienteDiarioPage() {
   const ratioGKg = (protNum / pesoNum).toFixed(2);
 
   return (
-    <div className="p-4 space-y-4 pb-12">
-      {/* Header Formulario (Figura 4) */}
-      <div className="pt-1">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
-            <ClipboardEdit className="w-4 h-4" />
+    <div className="w-full min-h-full">
+      <PacienteTopBar
+        titulo="Registro Diario"
+        subtitulo="Sincronización en menos de 60 segundos"
+        badge="Sincronización Diaria"
+      />
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Banner de retroalimentación de éxito */}
+        {success && (
+          <div
+            role="status"
+            className="p-4 rounded-3xl bg-[var(--primary-surface)] border border-[var(--primary-border)] text-[var(--primary-text)] flex items-center gap-3 shadow-sm animate-in fade-in"
+          >
+            <CheckCircle2 className="w-6 h-6 shrink-0" />
+            <div>
+              <span className="font-bold block text-sm">¡Registro guardado con éxito!</span>
+              <span className="text-xs opacity-90">
+                Tus datos se sincronizaron con la base de datos y ya los puede revisar tu especialista.
+              </span>
+            </div>
           </div>
-          <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">
-            Sincronización Diaria
-          </span>
-        </div>
-        <h1 className="text-xl font-black text-slate-900 tracking-tight">Registro Diario</h1>
-        <p className="text-xs text-slate-600">
-          Completa tu peso en ayunas y entrenamiento en menos de 60 segundos. Se sincroniza directamente con tu nutriólogo.
-        </p>
+        )}
+
+        {/* Mensaje de error */}
+        {error && (
+          <div
+            role="alert"
+            className="p-4 rounded-3xl bg-[var(--danger-surface)] border border-[var(--danger-border)] text-[var(--danger-text)] flex items-center gap-3 shadow-sm"
+          >
+            <AlertTriangle className="w-5 h-5 shrink-0" />
+            <span className="text-xs font-semibold">{error}</span>
+          </div>
+        )}
+
+        {/* Formulario Principal Adaptable */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* ==============================================================
+                COLUMNA 1: FECHA, PESO EN AYUNAS Y CARGAS (lg:col-span-7)
+                ============================================================== */}
+            <div className="lg:col-span-7 space-y-6">
+              {/* Fecha y Peso en Ayunas */}
+              <div className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Scale className="w-5 h-5 text-[var(--primary)]" />
+                    <h2 className="text-sm sm:text-base font-bold text-[var(--text)]">
+                      1. Medición Matutina
+                    </h2>
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--primary-surface)] text-[var(--primary-text)] border border-[var(--primary-border)]">
+                    Obligatorio
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Fecha */}
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5" />
+                      Fecha de la medición
+                    </label>
+                    <input
+                      type="date"
+                      value={fecha}
+                      onChange={(e) => setFecha(e.target.value)}
+                      required
+                      className="w-full bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-sm text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors min-h-[44px]"
+                    />
+                  </div>
+
+                  {/* Peso en Ayunas */}
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5 flex items-center gap-1.5">
+                      <Scale className="w-3.5 h-3.5" />
+                      Peso en Ayunas (kg)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.05"
+                        value={pesoAyunas}
+                        onChange={(e) => setPesoAyunas(e.target.value)}
+                        placeholder="78.4"
+                        required
+                        className="w-full text-xl sm:text-2xl font-black text-[var(--text)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-4 py-2 focus:outline-none focus:border-[var(--primary)] pr-12 transition-colors min-h-[44px]"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-muted)]">
+                        kg
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-[var(--text-subtle)] leading-relaxed italic">
+                  💡 Pésate inmediatamente al despertar, tras orinar y antes de consumir agua o alimentos.
+                </p>
+              </div>
+
+              {/* Sobrecarga Progresiva (Sentadilla, Prensa/Banca, Volumen) */}
+              <div className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Dumbbell className="w-5 h-5 text-[var(--primary)]" />
+                    <h2 className="text-sm sm:text-base font-bold text-[var(--text)]">
+                      2. Cargas Principales de Fuerza
+                    </h2>
+                  </div>
+                  <span className="text-xs text-[var(--text-subtle)]">
+                    Sobrecarga progresiva
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Sentadilla */}
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5">
+                      Sentadilla (kg)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.5"
+                        value={sentadillaKg}
+                        onChange={(e) => setSentadillaKg(e.target.value)}
+                        placeholder="100"
+                        className="w-full text-lg font-black text-[var(--text)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-[var(--primary)] pr-10 transition-colors min-h-[44px]"
+                      />
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-muted)]">
+                        kg
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Press de Banca */}
+                  <div>
+                    <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5">
+                      Press de Banca (kg)
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.5"
+                        value={pressBancaKg}
+                        onChange={(e) => setPressBancaKg(e.target.value)}
+                        placeholder="70"
+                        className="w-full text-lg font-black text-[var(--text)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-[var(--primary)] pr-10 transition-colors min-h-[44px]"
+                      />
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-muted)]">
+                        kg
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Volumen total */}
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5 flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5" />
+                    Volumen Total de la Sesión (kg levantados)
+                  </label>
+                  <input
+                    type="number"
+                    value={volumenKg}
+                    onChange={(e) => setVolumenKg(e.target.value)}
+                    placeholder="12500"
+                    className="w-full bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-sm text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors min-h-[44px]"
+                  />
+                  <span className="text-[10px] text-[var(--text-subtle)] block mt-1">
+                    Suma total de repeticiones × peso levantado en la sesión de entrenamiento.
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* ==============================================================
+                COLUMNA 2: PROTEÍNA, NOTAS Y ENVÍO (lg:col-span-5)
+                ============================================================== */}
+            <div className="lg:col-span-5 space-y-6">
+              {/* Proteína con Alerta Médica > 2.0 g/kg */}
+              <div className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Apple className="w-5 h-5 text-[var(--primary)]" />
+                    <h2 className="text-sm sm:text-base font-bold text-[var(--text)]">
+                      3. Ingesta de Proteína
+                    </h2>
+                  </div>
+                  <span className="text-xs font-bold text-[var(--text-muted)]">
+                    Ratio: {ratioGKg} g/kg
+                  </span>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5">
+                    Gramos de Proteína Ingeridos Hoy
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={proteinaG}
+                      onChange={(e) => setProteinaG(e.target.value)}
+                      placeholder="140"
+                      className="w-full text-2xl font-black text-[var(--text)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-4 py-2.5 focus:outline-none focus:border-[var(--primary)] pr-10 transition-colors min-h-[44px]"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[var(--text-muted)]">
+                      g
+                    </span>
+                  </div>
+                </div>
+
+                {/* ALERTA CIENTÍFICA SI SUPERA 2.0 g/kg (WCAG AA) */}
+                {alertaProteina ? (
+                  <div
+                    role="alert"
+                    className="p-4 rounded-2xl bg-[var(--danger-surface)] border border-[var(--danger-border)] text-[var(--danger-text)] text-xs space-y-1"
+                  >
+                    <div className="flex items-center gap-2 font-bold">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      <span>Alerta Médica: Ratio de {ratioGKg} g/kg supera el límite</span>
+                    </div>
+                    <p className="leading-relaxed opacity-95">
+                      Ingestas mayores a 2.0 g/kg no generan hipertrofia muscular extra y saturan la tasa de aclaramiento renal. Tu rango prescrito es de 1.6–1.8 g/kg.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-3.5 rounded-2xl bg-[var(--primary-surface)] border border-[var(--primary-border)] text-[var(--primary-text)] text-xs flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 shrink-0 text-[var(--primary)]" />
+                    <span>Rango seguro y óptimo para hipertrofia (1.6 – 1.8 g/kg).</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Sensaciones / Notas */}
+              <div className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-3">
+                <label className="block text-xs font-bold text-[var(--text-muted)] uppercase flex items-center gap-1.5">
+                  <FileText className="w-3.5 h-3.5" />
+                  Sensaciones del Entrenamiento (Opcional)
+                </label>
+                <textarea
+                  value={notas}
+                  onChange={(e) => setNotas(e.target.value)}
+                  rows={3}
+                  placeholder="Ej. Buena energía en sentadilla, descanso adecuado, sin molestias articulares."
+                  className="w-full bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl p-3 text-xs sm:text-sm text-[var(--text)] focus:outline-none focus:border-[var(--primary)] resize-none transition-colors"
+                />
+              </div>
+
+              {/* Botón de Enviar */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-950/20 flex items-center justify-center gap-2.5 transition-all disabled:opacity-50 cursor-pointer min-h-[48px] focus-visible:outline-2 focus-visible:outline-emerald-500"
+              >
+                {loading ? 'Sincronizando con base de datos...' : 'Guardar y Sincronizar Registro'}
+                <ArrowRight className="w-5 h-5" />
+              </button>
+
+              <p className="text-[11px] text-[var(--text-subtle)] text-center flex items-center justify-center gap-1.5">
+                <Info className="w-3.5 h-3.5" />
+                Actualización instantánea en el panel de tu nutriólogo.
+              </p>
+            </div>
+          </div>
+        </form>
       </div>
-
-      {success && (
-        <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs flex items-center gap-2.5 shadow-sm animate-in fade-in">
-          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-          <div>
-            <span className="font-bold block">¡Registro guardado con éxito!</span>
-            <span className="text-[11px] text-emerald-700">
-              Tus datos ya están sincronizados con la base de datos.
-            </span>
-          </div>
-        </div>
-      )}
-
-      {error && (
-        <div className="p-3 rounded-2xl bg-rose-50 border border-rose-300 text-rose-800 text-xs flex items-center gap-2 shadow-sm">
-          <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Campo Fecha */}
-        <div className="bg-white p-3 rounded-2xl border border-slate-200">
-          <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1 flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-slate-500" />
-            Fecha de la medición
-          </label>
-          <input
-            type="date"
-            value={fecha}
-            onChange={(e) => setFecha(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-emerald-500"
-          />
-        </div>
-
-        {/* Sección Peso en Ayunas (Crucial) */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-              <Scale className="w-4 h-4 text-emerald-600" />
-              Peso en Ayunas (kg)
-            </label>
-            <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold">
-              Obligatorio
-            </span>
-          </div>
-          <div className="relative">
-            <input
-              type="number"
-              step="0.05"
-              value={pesoAyunas}
-              onChange={(e) => setPesoAyunas(e.target.value)}
-              placeholder="78.4"
-              required
-              className="w-full text-2xl font-black text-slate-900 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-emerald-500 pr-12"
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-500">
-              kg
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-600 italic">
-            Mídete inmediatamente al levantarte, después de ir al baño y antes de ingerir líquidos.
-          </p>
-        </div>
-
-        {/* Sección Cargas Principales (Sobrecarga progresiva) */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-              <Dumbbell className="w-4 h-4 text-emerald-600" />
-              Sobrecarga Progresiva (Cargas Máximas)
-            </label>
-            <span className="text-[10px] text-slate-600">Sesión de fuerza</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <span className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
-                Sentadilla
-              </span>
-              <div className="relative">
-                <input
-                  type="number"
-                  step="0.5"
-                  value={sentadillaKg}
-                  onChange={(e) => setSentadillaKg(e.target.value)}
-                  placeholder="100"
-                  className="w-full font-black text-slate-900 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base focus:outline-none focus:border-emerald-500 pr-10"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">
-                  kg
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <span className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
-                Press de Banca
-              </span>
-              <div className="relative">
-                <input
-                  type="number"
-                  step="0.5"
-                  value={pressBancaKg}
-                  onChange={(e) => setPressBancaKg(e.target.value)}
-                  placeholder="70"
-                  className="w-full font-black text-slate-900 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-base focus:outline-none focus:border-emerald-500 pr-10"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">
-                  kg
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <span className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
-              Volumen Total de Entrenamiento (kg o series)
-            </span>
-            <input
-              type="number"
-              value={volumenKg}
-              onChange={(e) => setVolumenKg(e.target.value)}
-              placeholder="12500"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:border-emerald-500"
-            />
-          </div>
-        </div>
-
-        {/* Ingesta de Proteína con Alerta de Seguridad Médica */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-              <Apple className="w-4 h-4 text-emerald-600" />
-              Proteína Ingerida Hoy (g)
-            </label>
-            <span className="text-[10px] font-bold text-slate-600">
-              Ratio: {ratioGKg} g/kg
-            </span>
-          </div>
-
-          <div className="relative">
-            <input
-              type="number"
-              value={proteinaG}
-              onChange={(e) => setProteinaG(e.target.value)}
-              placeholder="140"
-              className="w-full text-lg font-black text-slate-900 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-emerald-500 pr-10"
-            />
-            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">
-              g
-            </span>
-          </div>
-
-          {/* ALERTA CIENTÍFICA SI EXCEDE 2.0 g/kg (Figura 4) */}
-          {alertaProteina ? (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-[11px] flex items-start gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <div>
-                <strong className="block font-bold">Límite recomendado superado ({ratioGKg} g/kg)</strong>
-                Las evidencias científicas (Morton et al., 2018) demuestran que ingestas superiores a 2.0 g/kg no ofrecen mayor hipertrofia muscular y saturan la oxidación de aminoácidos. Tu rango prescrito es 1.6–1.8 g/kg.
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 bg-emerald-50/70 p-2 rounded-lg">
-              <Sparkles className="w-3.5 h-3.5 shrink-0" />
-              <span>Rango seguro y óptimo para hipertrofia (1.6 a 1.8 g/kg).</span>
-            </div>
-          )}
-        </div>
-
-        {/* Notas Adicionales */}
-        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-sm space-y-1.5">
-          <label className="block text-[11px] font-bold text-slate-600 uppercase">
-            Sensaciones o Comentarios del Día (Opcional)
-          </label>
-          <textarea
-            value={notas}
-            onChange={(e) => setNotas(e.target.value)}
-            rows={2}
-            placeholder="Ej. Buena energía en sentadilla, descanso adecuado, sin molestias articulares."
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs text-slate-800 focus:outline-none focus:border-emerald-500 resize-none"
-          />
-        </div>
-
-        {/* Botón Guardar */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-2xl text-sm shadow-md shadow-emerald-700/20 flex items-center justify-center gap-2 transition-all disabled:opacity-50"
-        >
-          {loading ? 'Guardando en BD...' : 'Guardar y Sincronizar Registro'}
-          <ArrowRight className="w-4 h-4" />
-        </button>
-
-        <p className="text-[10px] text-slate-600 text-center flex items-center justify-center gap-1">
-          <Info className="w-3 h-3" /> Tus datos se actualizan instantáneamente en el panel del especialista.
-        </p>
-      </form>
     </div>
   );
 }
