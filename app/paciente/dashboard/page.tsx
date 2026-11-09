@@ -12,12 +12,15 @@ import {
   AlertCircle,
   CheckCircle2,
   ChevronRight,
-  ArrowUpRight,
-  Calendar,
   Sparkles,
   Droplet,
+  Calendar,
   Clock,
+  ArrowRight,
+  Activity,
+  Award,
 } from 'lucide-react';
+import { PacienteTopBar } from '@/components/paciente/PacienteNavigation';
 
 interface PacienteData {
   id: string;
@@ -73,11 +76,15 @@ export default function PacienteDashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-4 animate-pulse">
-        <div className="h-6 w-32 bg-slate-200 rounded"></div>
-        <div className="h-24 bg-slate-200 rounded-2xl"></div>
-        <div className="h-36 bg-slate-200 rounded-2xl"></div>
-        <div className="h-28 bg-slate-200 rounded-2xl"></div>
+      <div className="w-full">
+        <PacienteTopBar titulo="Dashboard" subtitulo="Cargando tu plan..." />
+        <div className="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6 animate-pulse">
+          <div className="h-20 bg-slate-200 dark:bg-slate-800/60 rounded-2xl"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="h-64 bg-slate-200 dark:bg-slate-800/60 rounded-3xl lg:col-span-2"></div>
+            <div className="h-64 bg-slate-200 dark:bg-slate-800/60 rounded-3xl"></div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -117,246 +124,397 @@ export default function PacienteDashboardPage() {
   // Último mensaje del nutriólogo
   const ultimoMensaje = paciente.mensajes?.slice(-1)[0];
 
-  const getStatusBadge = (estado: string) => {
-    switch (estado) {
-      case 'En progreso':
-        return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-      case 'Estancado':
-        return 'bg-amber-100 text-amber-800 border-amber-300';
-      default:
-        return 'bg-rose-100 text-rose-800 border-rose-300';
-    }
-  };
+  // Cálculo de progreso porcentual
+  const porcentajeProgreso = Math.min(100, Math.max(10, Math.round((peso / objetivo) * 100)));
 
   return (
-    <div className="p-4 space-y-4 pb-12">
-      {/* 1. Header Saludo y Perfil (Figura 3) */}
-      <div className="flex items-center justify-between pt-1">
-        <div>
-          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block">
-            Plan de Hipertrofia
-          </span>
-          <h1 className="text-xl font-black text-slate-900 tracking-tight">
-            Hola, {paciente.nombre.split(' ')[0]} 👋
-          </h1>
-          <p className="text-xs text-slate-600">
-            {fechaFormateada || 'Plan activo'}
-          </p>
-        </div>
-        <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-emerald-700/20">
-          {paciente.nombre.charAt(0)}
-        </div>
-      </div>
+    <div className="w-full min-h-full">
+      {/* Encabezado Superior Adaptable */}
+      <PacienteTopBar
+        titulo={`Hola, ${paciente.nombre.split(' ')[0]}`}
+        subtitulo={fechaFormateada ? `Hoy es ${fechaFormateada}` : 'Plan de hipertrofia activo'}
+        badge="Plan Activo"
+      />
 
-      {/* 2. Banner de Registro Pendiente / Completado */}
-      {!registroHoy ? (
-        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/30 flex items-center justify-between gap-3">
-          <div className="flex items-start gap-2.5">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-            <div>
-              <div className="text-xs font-bold text-amber-900">Registro de hoy pendiente</div>
-              <div className="text-[11px] text-amber-700">
-                Pésate en ayunas e ingresa tus cargas del día.
+      {/* Contenedor Centrado y Fluido (max-w-7xl, clamp de padding) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* BANNER DE BIENVENIDA / HERO FLUIDO */}
+        <section
+          aria-label="Resumen de bienvenida"
+          className="rounded-3xl p-5 sm:p-6 lg:p-8 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-lg shadow-emerald-950/20 relative overflow-hidden"
+        >
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1.5 max-w-2xl">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-[11px] font-bold tracking-wide uppercase">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Protocolo de Hipertrofia Miofibrilar</span>
               </div>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black tracking-tight leading-tight">
+                {paciente.nombre}
+              </h2>
+              <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed">
+                Supervisión diaria con superávit calórico controlado (+{paciente.superavit_kcal || 400} kcal) y sobrecarga en sentadilla y banca.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <Link
+                href="/paciente/diario"
+                className="px-4 py-2.5 rounded-xl bg-white text-emerald-800 hover:bg-emerald-50 text-xs sm:text-sm font-bold shadow-md transition-all flex items-center gap-2 cursor-pointer min-h-[44px] focus-visible:outline-2 focus-visible:outline-white"
+              >
+                <Dumbbell className="w-4 h-4 text-emerald-600" />
+                <span>Registrar Hoy</span>
+              </Link>
+              <Link
+                href="/paciente/chat"
+                className="px-4 py-2.5 rounded-xl bg-emerald-700/60 hover:bg-emerald-700/90 border border-white/25 text-white text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer min-h-[44px] focus-visible:outline-2 focus-visible:outline-white"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Consultar Nutriólogo</span>
+              </Link>
             </div>
           </div>
-          <Link
-            href="/paciente/diario"
-            className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shrink-0 shadow-sm transition-colors"
-          >
-            Registrar
-          </Link>
+
+          {/* Adorno visual de fondo */}
+          <div className="absolute -right-8 -bottom-12 w-64 h-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+        </section>
+
+        {/* ====================================================================
+            LAYOUT GRID RESPONSIVO:
+            - Móvil (<640px): 1 columna apilada
+            - Tablet (640-1024px): 2 columnas
+            - Escritorio (>1024px): 12 columnas (8 col principal, 4 col lateral)
+            ==================================================================== */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* ================================================================
+              COLUMNA PRINCIPAL (lg:col-span-8)
+              ================================================================ */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* 1. TARJETA: COMPOSICIÓN CORPORAL (Figura 3) */}
+            <article
+              aria-label="Composición Corporal"
+              className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] hover:border-[var(--primary)] transition-all"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-[var(--primary-surface)] border border-[var(--primary-border)] text-[var(--primary-text)] flex items-center justify-center shrink-0">
+                    <Scale className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-[var(--text)]">
+                      Composición Corporal & Peso
+                    </h3>
+                    <p className="text-xs text-[var(--text-subtle)]">
+                      Monitoreo matutino en ayunas
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                      paciente.estado_hipertrofia === 'En progreso'
+                        ? 'bg-[var(--primary-surface)] text-[var(--primary-text)] border-[var(--primary-border)]'
+                        : paciente.estado_hipertrofia === 'Estancado'
+                        ? 'bg-[var(--warning-surface)] text-[var(--warning-text)] border-[var(--warning-border)]'
+                        : 'bg-[var(--danger-surface)] text-[var(--danger-text)] border-[var(--danger-border)]'
+                    }`}
+                  >
+                    {paciente.estado_hipertrofia}
+                  </span>
+                </div>
+              </div>
+
+              {/* Grid 2 columnas para Peso Actual y Peso Objetivo */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">
+                    Peso Actual
+                  </span>
+                  <div className="flex items-baseline gap-1.5 mt-1">
+                    <span className="text-3xl sm:text-4xl font-black text-[var(--text)] tracking-tight">
+                      {peso}
+                    </span>
+                    <span className="text-sm font-bold text-[var(--text-muted)]">kg</span>
+                  </div>
+                  <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[var(--primary)]">
+                    <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+                    <span>Cargas: {paciente.tendencia_cargas || 'Suben'}</span>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
+                  <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">
+                    Peso Meta
+                  </span>
+                  <div className="flex items-baseline gap-1.5 mt-1">
+                    <span className="text-3xl sm:text-4xl font-black text-[var(--text-subtle)] tracking-tight">
+                      {objetivo}
+                    </span>
+                    <span className="text-sm font-bold text-[var(--text-muted)]">kg</span>
+                  </div>
+                  <div className="mt-2 text-xs font-semibold text-[var(--text-muted)]">
+                    {faltaSubir ? `Faltan +${diffPeso} kg de masa` : `Variación: ${diffPeso} kg`}
+                  </div>
+                </div>
+              </div>
+
+              {/* Barra de Progreso Accesible */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-xs font-semibold text-[var(--text-muted)]">
+                  <span>Progreso hacia objetivo magro</span>
+                  <span className="font-bold text-[var(--text)]">{porcentajeProgreso}%</span>
+                </div>
+                <div
+                  role="progressbar"
+                  aria-valuenow={porcentajeProgreso}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label="Progreso hacia meta de peso"
+                  className="w-full h-3 rounded-full bg-[var(--surface-active)] overflow-hidden"
+                >
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
+                    style={{ width: `${porcentajeProgreso}%` }}
+                  />
+                </div>
+              </div>
+            </article>
+
+            {/* 2. TARJETA: PRESCRIPCIÓN DEL DÍA (4 Subtarjetas en Grid Adaptable) */}
+            <article
+              aria-label="Prescripción nutricional del día"
+              className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-5"
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-10 h-10 rounded-2xl bg-[var(--primary-surface)] border border-[var(--primary-border)] text-[var(--primary-text)] flex items-center justify-center shrink-0">
+                    <Apple className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-[var(--text)]">
+                      Prescripción Nutricional Diaria
+                    </h3>
+                    <p className="text-xs text-[var(--text-subtle)]">
+                      Basado en ciencia de hipertrofia (Morton et al., 2018; Schoenfeld, 2021)
+                    </p>
+                  </div>
+                </div>
+
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-[var(--surface-raised)] border border-[var(--border)] text-[var(--text)]">
+                  Nivel: {paciente.nivel_entrenamiento}
+                </span>
+              </div>
+
+              {/* Grid de 4 Métricas (1 col en móvil pequeño, 2 en tablet, 4 en desktop) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* 1. Proteína Diaria */}
+                <div className="p-4 rounded-2xl bg-[var(--primary-surface)] border border-[var(--primary-border)] space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary-text)]">
+                      Proteína Diaria
+                    </span>
+                    <Sparkles className="w-4 h-4 text-[var(--primary)]" />
+                  </div>
+                  <div className="text-2xl font-black text-[var(--primary-text)]">
+                    {proteinaActualPrescrita} g
+                  </div>
+                  <p className="text-[11px] font-medium text-[var(--primary-text)] opacity-90">
+                    {paciente.proteina_g_kg || '1.75'} g/kg ({proteinaGramosMin}–{proteinaGramosMax} g)
+                  </p>
+                </div>
+
+                {/* 2. Superávit Calórico */}
+                <div className="p-4 rounded-2xl bg-[var(--warning-surface)] border border-[var(--warning-border)] space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--warning-text)]">
+                      Superávit
+                    </span>
+                    <Flame className="w-4 h-4 text-[var(--warning)]" />
+                  </div>
+                  <div className="text-2xl font-black text-[var(--warning-text)]">
+                    +{paciente.superavit_kcal || 400} kcal
+                  </div>
+                  <p className="text-[11px] font-medium text-[var(--warning-text)] opacity-90">
+                    Meta: {paciente.calorias_totales || 2700} kcal/día
+                  </p>
+                </div>
+
+                {/* 3. Hidratación */}
+                <div className="p-4 rounded-2xl bg-[var(--cyan-surface)] border border-[var(--cyan-border)] space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--cyan-text)]">
+                      Hidratación
+                    </span>
+                    <Droplet className="w-4 h-4 text-[var(--cyan)]" />
+                  </div>
+                  <div className="text-2xl font-black text-[var(--cyan-text)]">
+                    3.5 - 4.0 L
+                  </div>
+                  <p className="text-[11px] font-medium text-[var(--cyan-text)] opacity-90">
+                    Agua diaria recomendada
+                  </p>
+                </div>
+
+                {/* 4. Creatina */}
+                <div className="p-4 rounded-2xl bg-[var(--purple-surface)] border border-[var(--purple-border)] space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--purple-text)]">
+                      Suplementación
+                    </span>
+                    <Award className="w-4 h-4 text-[var(--purple)]" />
+                  </div>
+                  <div className="text-2xl font-black text-[var(--purple-text)]">
+                    5 g / día
+                  </div>
+                  <p className="text-[11px] font-medium text-[var(--purple-text)] opacity-90">
+                    Creatina monohidrato continua
+                  </p>
+                </div>
+              </div>
+
+              {/* Guía Informativa */}
+              <div className="p-3.5 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-start gap-3 text-xs text-[var(--text-muted)]">
+                <AlertCircle className="w-4 h-4 text-[var(--primary)] shrink-0 mt-0.5" />
+                <p className="leading-relaxed">
+                  <strong>Tope de seguridad:</strong> Ingestas superiores a 2.0 g/kg no proveen hipertrofia muscular extra según la evidencia clínica y saturan la oxidación de aminoácidos.
+                </p>
+              </div>
+            </article>
+          </div>
+
+          {/* ================================================================
+              COLUMNA LATERAL (lg:col-span-4)
+              ================================================================ */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* 1. BANNER: REGISTRO PENDIENTE O COMPLETADO */}
+            <article
+              aria-label="Estado del registro diario"
+              className="rounded-3xl p-5 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-[var(--primary)]" />
+                  <span className="text-xs font-bold text-[var(--text)] uppercase tracking-wider">
+                    Registro de Hoy
+                  </span>
+                </div>
+                <span className="text-[11px] text-[var(--text-subtle)]">
+                  {fechaHoyStr || 'Hoy'}
+                </span>
+              </div>
+
+              {!registroHoy ? (
+                <div className="p-4 rounded-2xl bg-[var(--warning-surface)] border border-[var(--warning-border)] text-[var(--warning-text)] space-y-3">
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="text-xs font-bold">Registro de hoy pendiente</h4>
+                      <p className="text-[11px] opacity-90 mt-0.5 leading-relaxed">
+                        Pésate en ayunas e ingresa tus cargas para sincronizar tu progreso con el especialista.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Link
+                    href="/paciente/diario"
+                    className="w-full py-2.5 px-3 rounded-xl bg-[var(--warning)] hover:bg-[var(--warning-hover)] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer min-h-[44px] focus-visible:outline-2 focus-visible:outline-emerald-500"
+                  >
+                    <span>Completar Registro Diario</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              ) : (
+                <div className="p-4 rounded-2xl bg-[var(--primary-surface)] border border-[var(--primary-border)] text-[var(--primary-text)] space-y-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 shrink-0" />
+                    <h4 className="text-xs font-bold">¡Registro de hoy completado!</h4>
+                  </div>
+                  <p className="text-xs opacity-90">
+                    Peso registrado: <strong>{registroHoy.peso_ayunas} kg</strong>. Datos sincronizados con tu nutriólogo.
+                  </p>
+                  <Link
+                    href="/paciente/diario"
+                    className="inline-flex items-center gap-1 text-xs font-bold underline underline-offset-2 hover:opacity-80 pt-1"
+                  >
+                    <span>Actualizar datos de hoy</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              )}
+            </article>
+
+            {/* 2. TARJETA: MENSAJE DEL ESPECIALISTA (Figura 3) */}
+            <article
+              aria-label="Mensaje del especialista"
+              className="rounded-3xl p-5 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-3"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                    <MessageSquare className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[var(--text)]">Mensaje del Especialista</h4>
+                    <p className="text-[10px] text-[var(--text-subtle)]">Nutriólogo Deportivo Asignado</p>
+                  </div>
+                </div>
+
+                <Link
+                  href="/paciente/chat"
+                  aria-label="Ir al chat con el nutriólogo"
+                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-0.5 min-h-[44px] items-center"
+                >
+                  <span>Chat</span>
+                  <ChevronRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] text-xs text-[var(--text)] space-y-2">
+                <p className="italic leading-relaxed">
+                  {ultimoMensaje?.contenido
+                    ? `"${ultimoMensaje.contenido}"`
+                    : '"Mantén la constancia en el peso matutino y la sobrecarga en sentadilla. Si tienes fatiga, avísame en el chat."'}
+                </p>
+                <div className="flex items-center justify-between text-[10px] text-[var(--text-subtle)] font-medium pt-1 border-t border-[var(--border-subtle)]">
+                  <span>Lic. Nutrición Deportiva</span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    Responde &lt; 24h
+                  </span>
+                </div>
+              </div>
+            </article>
+
+            {/* 3. TARJETA: ACCESOS RÁPIDOS Y REPORTE */}
+            <article
+              aria-label="Acciones rápidas"
+              className="rounded-3xl p-5 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-3"
+            >
+              <h4 className="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">
+                Acciones Rápidas
+              </h4>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Link
+                  href="/paciente/graficas"
+                  className="p-3 rounded-2xl bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--text)] text-left flex flex-col justify-between min-h-[72px] transition-colors focus-visible:outline-2 focus-visible:outline-emerald-500"
+                >
+                  <TrendingUp className="w-5 h-5 text-emerald-600 dark:text-emerald-400 mb-1" />
+                  <span className="text-xs font-bold leading-tight">Ver Gráficas</span>
+                </Link>
+
+                <Link
+                  href="/paciente/menu"
+                  className="p-3 rounded-2xl bg-[var(--surface-raised)] hover:bg-[var(--surface-hover)] border border-[var(--border)] text-[var(--text)] text-left flex flex-col justify-between min-h-[72px] transition-colors focus-visible:outline-2 focus-visible:outline-emerald-500"
+                >
+                  <Award className="w-5 h-5 text-indigo-600 dark:text-indigo-400 mb-1" />
+                  <span className="text-xs font-bold leading-tight">Biblioteca & PDF</span>
+                </Link>
+              </div>
+            </article>
+          </div>
         </div>
-      ) : (
-        <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs text-emerald-800 font-semibold">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>¡Registro de hoy completado ({registroHoy.peso_ayunas} kg)!</span>
-          </div>
-          <Link
-            href="/paciente/diario"
-            className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 underline"
-          >
-            Editar
-          </Link>
-        </div>
-      )}
-
-      {/* 3. Tarjeta de Peso Actual y Meta (Figura 3) */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm relative overflow-hidden">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
-              <Scale className="w-4 h-4" />
-            </div>
-            <span className="text-xs font-bold text-slate-700">Composición Corporal</span>
-          </div>
-          <span
-            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadge(
-              paciente.estado_hipertrofia
-            )}`}
-          >
-            {paciente.estado_hipertrofia}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-            <span className="text-[10px] font-bold text-slate-600 uppercase block">Peso Actual</span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-2xl font-black text-slate-900">{peso}</span>
-              <span className="text-xs text-slate-600 font-semibold">kg</span>
-            </div>
-            <span className="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5 mt-0.5">
-              <TrendingUp className="w-3 h-3" /> Cargas: {paciente.tendencia_cargas || 'Suben'}
-            </span>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-            <span className="text-[10px] font-bold text-slate-600 uppercase block">Objetivo</span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-2xl font-black text-slate-700">{objetivo}</span>
-              <span className="text-xs text-slate-600 font-semibold">kg</span>
-            </div>
-            <span className="text-[10px] text-slate-600 font-medium block mt-0.5">
-              {faltaSubir ? `Faltan +${diffPeso} kg` : `Diferencia: ${diffPeso} kg`}
-            </span>
-          </div>
-        </div>
-
-        {/* Barra de progreso de peso hacia el objetivo */}
-        <div>
-          <div className="flex justify-between text-[10px] font-semibold text-slate-600 mb-1">
-            <span>Progreso hacia volumen magro</span>
-            <span>{Math.min(100, Math.round((peso / objetivo) * 100))}%</span>
-          </div>
-          <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
-              style={{ width: `${Math.min(100, Math.round((peso / objetivo) * 100))}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Prescripción Nutricional Diaria (1.6 - 1.8 g/kg y +400 a +500 kcal) */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-teal-100 text-teal-700">
-              <Apple className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="text-xs font-bold text-slate-800 block">Prescripción del Día</span>
-              <span className="text-[10px] text-slate-600">Calculado para hipertrofia muscular</span>
-            </div>
-          </div>
-          <span className="text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-            {paciente.nivel_entrenamiento}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2.5">
-          {/* Tarjeta Proteína */}
-          <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50/40 border border-emerald-100">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold text-emerald-950 uppercase">Proteína Diaria</span>
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            </div>
-            <div className="text-lg font-black text-emerald-900 leading-tight">
-              {proteinaActualPrescrita} g
-            </div>
-            <div className="text-[10px] text-emerald-700 font-semibold mt-0.5">
-              {paciente.proteina_g_kg || '1.75'} g/kg ({proteinaGramosMin}–{proteinaGramosMax} g)
-            </div>
-          </div>
-
-          {/* Tarjeta Superávit */}
-          <div className="p-3 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50/40 border border-amber-100">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] font-bold text-amber-950 uppercase">Superávit Calórico</span>
-              <Flame className="w-3.5 h-3.5 text-amber-600" />
-            </div>
-            <div className="text-lg font-black text-amber-900 leading-tight">
-              +{paciente.superavit_kcal || 400} kcal
-            </div>
-            <div className="text-[10px] text-amber-700 font-semibold mt-0.5">
-              Meta: {paciente.calorias_totales || 2700} kcal/día
-            </div>
-          </div>
-        </div>
-
-        {/* Hidratación y Creatina */}
-        <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs text-slate-700">
-          <div className="flex items-center gap-2">
-            <Droplet className="w-4 h-4 text-cyan-600" />
-            <div>
-              <span className="font-semibold block text-[11px]">Agua recomendada:</span>
-              <span className="text-[10px] text-slate-600">3.5 a 4.0 litros / día</span>
-            </div>
-          </div>
-          <div className="text-right">
-            <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200">
-              Creatina: 5g / día
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* 5. Tarjeta de Retroalimentación del Nutriólogo (Figura 3) */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-indigo-100 text-indigo-700">
-              <MessageSquare className="w-4 h-4" />
-            </div>
-            <span className="text-xs font-bold text-slate-800">Mensaje de tu Especialista</span>
-          </div>
-          <Link
-            href="/paciente/chat"
-            className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5"
-          >
-            Abrir chat
-            <ChevronRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <div className="p-3 rounded-xl bg-indigo-50/50 border border-indigo-100 text-xs text-slate-700">
-          {ultimoMensaje ? (
-            <p className="line-clamp-2 italic">
-              &quot;{ultimoMensaje.contenido}&quot;
-            </p>
-          ) : (
-            <p className="text-slate-600 italic">
-              &quot;Mantén la constancia en el peso matutino. Si las cargas en sentadilla siguen subiendo, el superávit está funcionando óptimamente.&quot;
-            </p>
-          )}
-          <div className="mt-2 flex items-center justify-between text-[10px] text-indigo-700 font-semibold">
-            <span>Lic. Nutrición Deportiva</span>
-            <span>Nutriólogo Asignado</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 6. Botones de Acción Principal */}
-      <div className="grid grid-cols-2 gap-2.5 pt-1">
-        <Link
-          href="/paciente/diario"
-          className="p-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex flex-col items-center justify-center text-center shadow-md shadow-emerald-700/20 transition-colors"
-        >
-          <Dumbbell className="w-5 h-5 mb-1" />
-          <span>Registrar Hoy</span>
-          <span className="text-[9px] font-normal opacity-80">Peso y cargas del día</span>
-        </Link>
-
-        <Link
-          href="/paciente/graficas"
-          className="p-3.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-bold text-xs flex flex-col items-center justify-center text-center shadow-sm transition-colors"
-        >
-          <TrendingUp className="w-5 h-5 mb-1 text-emerald-600" />
-          <span>Ver Gráficas</span>
-          <span className="text-[9px] font-normal text-slate-600">Progreso de 4 semanas</span>
-        </Link>
       </div>
     </div>
   );
