@@ -1,0 +1,161 @@
+// Guías base para el paciente: las mismas de la app Flutter (contenido.dart, guiasPaciente).
+// Material informativo con referencias científicas; no sustituye la valoración de un profesional.
+export interface ArticuloBiblioteca {
+  /** Los artículos de los nutriólogos traen id de la base; las guías base no. */
+  id: string | null;
+  titulo: string;
+  categoria: string;
+  minutos: number;
+  resumen: string;
+  cuerpo: string;
+  citas: string;
+  /** Nombre público del nutriólogo que lo publicó (null en las guías base). */
+  autor: string | null;
+  deNutriologo: boolean;
+}
+
+export const GUIAS_BASE: ArticuloBiblioteca[] = [
+  {
+    id: null,
+    titulo: "Proteína: el rango que respalda la evidencia",
+    categoria: "Proteína & Salud Renal",
+    minutos: 4,
+    resumen: "Más proteína no siempre es mejor: el beneficio se aplana cerca de 1.6 g/kg al día.",
+    cuerpo: "La proteína aporta los aminoácidos con los que el músculo se repara y crece, pero el beneficio tiene techo. Un metaanálisis de 49 estudios (Morton et al., 2018) encontró que, en promedio, la ganancia de masa libre de grasa deja de crecer alrededor de 1.6 g de proteína por kg de peso al día; el límite superior del intervalo de confianza fue de 2.2 g/kg.\n\nLa postura de la Sociedad Internacional de Nutrición Deportiva (Jäger et al., 2017) da un rango de 1.4 a 2.0 g/kg al día para quien entrena fuerza.\n\nNutriMasa usa 1.6 a 1.8 g/kg y un tope de 2.0 g/kg: pasar de ahí no aporta más músculo y encarece la dieta. En adultos sanos, las revisiones no han encontrado daño renal por ingestas altas (Devries et al., 2018), pero en personas con enfermedad renal la proteína sí se limita. Por eso esta app no es para quien tiene enfermedad renal o diabetes sin supervisión médica.\n\nEjemplo con 70 kg: 1.6 × 70 = 112 g y 1.8 × 70 = 126 g al día. El tope de 2.0 g/kg serían 140 g.",
+    citas: "Morton et al. (2018) Br J Sports Med 52:376-384; Jäger et al. (2017) J Int Soc Sports Nutr 14:20; Devries et al. (2018) J Nutr 148:1760-1775.",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Cómo repartir tu proteína en el día",
+    categoria: "Nutrición",
+    minutos: 3,
+    resumen: "Lo que más cuenta es el total diario; repartirlo en 3 a 5 comidas es un buen ajuste fino.",
+    cuerpo: "Para maximizar la síntesis de proteína muscular se propone una dosis de unos 0.4 g/kg por comida, repartida en al menos cuatro comidas (Schoenfeld y Aragon, 2018). Con 70 kg serían unos 28 g por comida y unos 112 g al día.\n\nQué hacer en la práctica:\n• Incluye una fuente de proteína en cada comida, también en el desayuno.\n• No necesitas despertarte de madrugada ni comer cada dos horas.\n• La “ventana anabólica” de 30 minutos después de entrenar no es estricta: comer proteína en las horas antes y después de entrenar es razonable, pero el total del día pesa más (Aragon y Schoenfeld, 2013).",
+    citas: "Schoenfeld y Aragon (2018) J Int Soc Sports Nutr 15:10; Aragon y Schoenfeld (2013) J Int Soc Sports Nutr 10:5.",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Superávit calórico: cuánto y qué tan rápido",
+    categoria: "Superávit Calórico",
+    minutos: 4,
+    resumen: "Comer de más no acelera el músculo: un superávit moderado y un ritmo lento ganan más masa magra.",
+    cuerpo: "Para construir músculo hace falta energía extra, pero poca. Las revisiones sobre la fase de volumen sugieren un superávit de alrededor de 10 a 20 % sobre el gasto y un aumento de 0.25 a 0.5 % del peso corporal por semana en principiantes e intermedios (Iraki et al., 2019). NutriMasa usa +400 a +500 kcal sobre tu dieta habitual, que en muchas personas cae dentro de ese rango.\n\nCon 70 kg, 0.25 a 0.5 % son 175 a 350 g por semana, es decir, de 0.7 a 1.4 kg al mes. Si subes más rápido, una parte importante será grasa.\n\nCómo saber si el superávit es correcto:\n• Si tu peso no cambia en dos semanas y tus cargas no suben, tu nutriólogo puede subirlo, siempre sin pasar de 500 kcal.\n• Si tu peso sube pero tus cargas no, el superávit probablemente es excesivo o falta estímulo de entrenamiento.\n• El peso cambia de un día a otro por agua, sal y comida en el intestino: compara tendencias de la semana, no un solo día.",
+    citas: "Iraki, Fitschen, Espinar y Helms (2019) Sports 7(7):154; Slater et al. (2019) Front Nutr 6:131.",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Carbohidratos: el combustible para entrenar",
+    categoria: "Nutrición",
+    minutos: 4,
+    resumen: "Los carbohidratos reponen el glucógeno que gastas en series pesadas.",
+    cuerpo: "En entrenamiento de fuerza el músculo usa glucógeno, y llegar con reservas bajas puede restar calidad a tus series. La postura conjunta de la Academia de Nutrición y Dietética, Dietitians of Canada y el ACSM (Thomas et al., 2016) da referencias por día según la carga de entrenamiento:\n• Ejercicio ligero: 3 a 5 g/kg al día.\n• Ejercicio moderado (alrededor de 1 hora al día): 5 a 7 g/kg al día.\n\nCon 70 kg y entrenamiento moderado serían unos 350 a 490 g al día.\n\nAntes de entrenar: una comida con carbohidratos 1 a 4 horas antes (1 a 4 g/kg). Después: combina carbohidratos con tu proteína; si volverás a entrenar en menos de 8 horas, repón pronto; si no, pesa más el total del día.\n\nBuenas fuentes: arroz, avena, tortilla de maíz, frijoles, papa, plátano y fruta.",
+    citas: "Thomas, Erdman y Burke (2016) Med Sci Sports Exerc 48:543-568.",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Creatina: guía práctica",
+    categoria: "Suplementación",
+    minutos: 3,
+    resumen: "Es el suplemento con más respaldo para fuerza e hipertrofia, y la indica tu nutriólogo.",
+    cuerpo: "La creatina monohidrato es el suplemento con mayor evidencia para mejorar fuerza y masa muscular junto con el entrenamiento (Kreider et al., 2017).\n\nUso habitual: 3 a 5 g al día, todos los días, a cualquier hora. La “fase de carga” (alrededor de 0.3 g/kg al día durante 5 a 7 días) satura el músculo más rápido pero no es obligatoria.\n\nQué esperar:\n• En las primeras semanas puedes subir 1 a 2 kg por agua dentro del músculo; no es grasa.\n• Puede elevar un poco la creatinina en análisis de sangre sin que implique daño renal; avísale a quien interprete tus estudios.\n• Elige creatina monohidrato de una marca con sello de pruebas de terceros.\n\nEn NutriMasa no se recomienda por tu cuenta: la indica o valida tu nutriólogo según tu caso.",
+    citas: "Kreider et al. (2017) J Int Soc Sports Nutr 14:18.",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Cafeína y pre-entrenos: qué sí y qué no",
+    categoria: "Suplementación",
+    minutos: 3,
+    resumen: "La cafeína mejora el rendimiento, pero la dosis y la hora importan.",
+    cuerpo: "La cafeína mejora el rendimiento en fuerza y resistencia (Grgic et al., 2020). Las dosis estudiadas son de 3 a 6 mg/kg unos 60 minutos antes de entrenar (Guest et al., 2021). Con 70 kg: 210 a 420 mg; empieza por la dosis baja.\n\nHasta 400 mg al día se consideran seguros en adultos sanos (EFSA, 2015), aproximadamente cuatro tazas de café.\n\nPrecauciones:\n• Evítala en las 6 horas previas a dormir: 400 mg seis horas antes de acostarse redujeron el sueño (Drake et al., 2013).\n• Si tienes hipertensión, arritmias, ansiedad o estás embarazada, consulta antes.\n• Desconfía de “quemagrasas” y pre-entrenos de fórmula secreta: no sabes cuánta cafeína ni qué más contienen. Busca sellos de pruebas de terceros.",
+    citas: "Grgic et al. (2020) Br J Sports Med 54:681-688; Guest et al. (2021) J Int Soc Sports Nutr 18:1; EFSA (2015) EFSA Journal 13(5):4102; Drake et al. (2013) J Clin Sleep Med 9:1195-1200.",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Entrenar para crecer: series, frecuencia y cercanía al fallo",
+    categoria: "Entrenamiento",
+    minutos: 4,
+    resumen: "Volumen suficiente, dos veces por semana por músculo y series cerca del fallo.",
+    cuerpo: "La nutrición pone los materiales, pero el estímulo lo da el entrenamiento.\n\nVolumen: hacer 10 o más series semanales por grupo muscular produjo más hipertrofia que menos de 5 series (Schoenfeld et al., 2017).\n\nFrecuencia: entrenar cada grupo muscular al menos 2 veces por semana fue mejor que 1 vez cuando se igualó el volumen (Schoenfeld et al., 2016).\n\nCercanía al fallo: cargas de intensidad baja a alta producen una hipertrofia similar si las series terminan cerca del fallo (Schoenfeld et al., 2017). Termina con 1 a 3 repeticiones en reserva y con buena técnica.\n\nSobrecarga progresiva: sube poco a poco kilos o repeticiones y anota tus cargas en la app. Si tus cargas no suben, el estímulo o la recuperación necesitan ajuste.",
+    citas: "Schoenfeld, Ogborn y Krieger (2017) J Sports Sci 35:1073-1082; Schoenfeld et al. (2016) Sports Med 46:1689-1697; Schoenfeld et al. (2017) J Strength Cond Res 31:3508-3523.",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Cómo leer tu progreso: peso y cargas",
+    categoria: "Entrenamiento",
+    minutos: 3,
+    resumen: "Tu estado se calcula con dos señales: cómo cambia tu peso y cómo cambian tus cargas.",
+    cuerpo: "NutriMasa compara tus registros de los últimos 14 días (necesita al menos 3 registros en 6 días o más):\n• En progreso: tu peso o tus cargas están subiendo.\n• Estancado: tu peso casi no cambia (menos de 0.2 kg) y tus cargas no suben.\n• Peso sube, cargas no: subes 0.5 kg o más sin mejorar tus cargas; suele indicar exceso de superávit o falta de estímulo.\n• Sin datos: aún faltan registros.\n\nPara que la medición sea útil:\n• Pésate en ayunas, a la misma hora y después de ir al baño.\n• Registra al menos 3 días por semana, aunque no sea perfecto.\n• Mira la tendencia de dos semanas, no un solo día.",
+    citas: "Criterios del motor de reglas de NutriMasa.",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Sueño y recuperación",
+    categoria: "Recuperación y hábitos",
+    minutos: 3,
+    resumen: "Dormir poco resta recuperación y puede aumentar el hambre.",
+    cuerpo: "Los adultos necesitan al menos 7 horas de sueño por noche para una salud óptima (Watson et al., 2015). En estudios con privación de sueño, una sola noche sin dormir redujo la síntesis de proteína muscular (Lamon et al., 2021).\n\nHábitos que ayudan:\n• Horario regular para acostarte y levantarte.\n• Cuarto oscuro y fresco, sin pantallas la última hora.\n• Cafeína solo en la mañana o antes de entrenar temprano.\n• Si roncas fuerte y tienes sueño durante el día, consulta a un médico.",
+    citas: "Watson et al. (2015) Sleep 38:843-844; Lamon et al. (2021) Physiol Rep 9:e14660.",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Hidratación y alcohol",
+    categoria: "Recuperación y hábitos",
+    minutos: 3,
+    resumen: "Una hidratación adecuada protege el rendimiento; el alcohol lo estorba.",
+    cuerpo: "Perder por sudor más de 2 % del peso corporal puede reducir el rendimiento (Sawka et al., 2007). Una guía sencilla: bebe agua a lo largo del día, antes, durante y después de entrenar, y revisa que tu orina sea amarillo pálido.\n\nAlcohol: después de entrenar redujo la síntesis de proteína muscular, incluso cuando se tomó junto con proteína (Parr et al., 2014). Además aporta 7 kcal por gramo sin nutrientes. Si bebes, hazlo con moderación y no justo después de entrenar.",
+    citas: "Sawka et al. (2007) Med Sci Sports Exerc 39:377-390; Parr et al. (2014) PLoS One 9:e88384.",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Un día de ejemplo con comida mexicana",
+    categoria: "Nutrición",
+    minutos: 4,
+    resumen: "Cómo llegar a unos 120 g de proteína con alimentos comunes (persona de 70 kg).",
+    cuerpo: "Ejemplo orientativo para una persona de 70 kg con meta de 1.7 g/kg (unos 119 g de proteína). Las cifras cambian según marca y porción; revisa la tabla nutrimental.\n\n• Desayuno (≈ 30 g): 3 huevos, ½ taza de frijoles, 2 tortillas de maíz y fruta.\n• Colación (≈ 20 g): yogur griego de 170 g con avena y plátano.\n• Comida (≈ 40 g): 120 g de pechuga de pollo, arroz, verduras y tortillas.\n• Cena (≈ 30 g): 1 lata de atún con tostadas y aguacate, y un vaso de leche.\n\nTotal aproximado: 120 g.\n\nReferencias de proteína por porción: huevo grande ≈ 6 g; pollo cocido 100 g ≈ 31 g; frijoles cocidos 1 taza ≈ 15 g; lentejas cocidas 1 taza ≈ 18 g; leche 1 taza ≈ 8 g; requesón ½ taza ≈ 12 a 14 g.\n\nTu nutriólogo adapta este ejemplo a tu presupuesto, gustos y horarios.",
+    citas: "USDA FoodData Central; Sistema Mexicano de Alimentos Equivalentes (SMAE).",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Mitos del gimnasio (“bro-science”)",
+    categoria: "Mitos y seguridad",
+    minutos: 3,
+    resumen: "Seis consejos populares que conviene verificar antes de cambiar tu dieta.",
+    cuerpo: "Muchas personas se informan con amigos o compañeros de entrenamiento, no con profesionales de la salud. Algunos mitos frecuentes:\n\n• “Más proteína, más músculo”: el beneficio se aplana cerca de 1.6 g/kg (Morton et al., 2018).\n• “Hay que comer proteína a los 30 minutos de entrenar”: la ventana no es tan estricta; importa el total del día (Aragon y Schoenfeld, 2013).\n• “Comer cada 2 o 3 horas acelera el metabolismo”: no es necesario; elige un horario que sí puedas cumplir.\n• “Los quemagrasas ayudan a ganar músculo”: suelen llevar estimulantes en dosis poco claras y riesgos.\n• “Los carbohidratos engordan”: son combustible para entrenar; lo que engorda es el exceso de energía total.\n• “Los esteroides son atajos”: tienen riesgos serios y requieren control médico.\n\nAntes de cambiar tu alimentación por un consejo de gimnasio, pregúntale a tu nutriólogo.",
+    citas: "Morton et al. (2018); Aragon y Schoenfeld (2013).",
+    autor: null,
+    deNutriologo: false,
+  },
+  {
+    id: null,
+    titulo: "Cuándo consultar a un profesional de la salud",
+    categoria: "Mitos y seguridad",
+    minutos: 2,
+    resumen: "Señales que no se atienden por chat ni con ajustes de dieta.",
+    cuerpo: "Consulta a un profesional de la salud, y no ajustes tu plan por tu cuenta, si tienes:\n• Dolor en el pecho, falta de aire, mareo, desmayos o palpitaciones.\n• Dolor que no cede, lesión o adormecimiento.\n• Orina oscura o con sangre, hinchazón o fiebre.\n• Vómito, náusea persistente o malestar digestivo intenso.\n\nTambién conviene consultar si notas atracones, purgas, ayunos extremos o una preocupación constante por parecer poco musculoso aunque lo estés; esto último se conoce como dismorfia muscular (Pope et al., 1997).\n\nEsta app no sirve para urgencias. Si es urgente, llama al 911 o acude a urgencias.",
+    citas: "Pope et al. (1997) Psychosomatics 38:548-557.",
+    autor: null,
+    deNutriologo: false,
+  },
+];
