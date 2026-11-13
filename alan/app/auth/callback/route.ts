@@ -39,6 +39,8 @@ export async function GET(request: Request) {
   if (sesion) {
     const { data } = await supabase.auth.getUser();
     if (data.user) {
+      // Cuenta de nutriólogo: ya con el correo confirmado, a capturar sus datos profesionales.
+      if (data.user.user_metadata?.tipo === 'nutriologo') return NextResponse.redirect(`${origin}/admin/solicitud`);
       const creado = await asegurarUsuario(supabase, data.user);
       if (creado) return NextResponse.redirect(`${origin}/paciente/dashboard`);
     }

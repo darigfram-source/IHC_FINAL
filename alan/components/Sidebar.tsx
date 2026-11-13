@@ -9,6 +9,8 @@ import {
   BookOpen,
   Dumbbell,
   ShieldCheck,
+  Scale,
+  UserCog,
   LogOut,
   RotateCcw,
   Smartphone,
@@ -169,6 +171,24 @@ export const Sidebar: React.FC = () => {
         >
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <span>Aviso LFPDPPP & Salud</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('normativa')}
+          className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs transition-all text-left ${
+            activeTab === 'normativa' ? 'bg-emerald-600 text-white font-semibold' : 'text-emerald-200/70 hover:bg-[#122e23] hover:text-white'
+          }`}
+        >
+          <Scale className="w-4 h-4 text-emerald-400" />
+          <span>Normativa del profesional</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('perfil')}
+          className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs transition-all text-left ${
+            activeTab === 'perfil' ? 'bg-emerald-600 text-white font-semibold' : 'text-emerald-200/70 hover:bg-[#122e23] hover:text-white'
+          }`}
+        >
+          <UserCog className="w-4 h-4 text-emerald-400" />
+          <span>Mi perfil profesional</span>
         </button>
       </div>
 

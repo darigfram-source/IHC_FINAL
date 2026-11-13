@@ -10,6 +10,8 @@ import { ChatView } from '@/components/ChatView';
 import { ReportsView } from '@/components/ReportsView';
 import { LibraryView } from '@/components/LibraryView';
 import { ArcoView } from '@/components/ArcoView';
+import { NormativaView } from '@/components/NormativaView';
+import { PerfilNutriView } from '@/components/PerfilNutriView';
 import { UserDetailModal } from '@/components/UserDetailModal';
 import { AdjustPlanModal } from '@/components/AdjustPlanModal';
 import { ConsentModal } from '@/components/ConsentModal';
@@ -63,6 +65,10 @@ export default function AdminDashboardPage() {
           {activeTab === 'biblioteca' && <LibraryView />}
 
           {activeTab === 'arco' && <ArcoView />}
+
+          {activeTab === 'normativa' && <NormativaView />}
+
+          {activeTab === 'perfil' && <PerfilNutriView />}
         </main>
       </div>
 

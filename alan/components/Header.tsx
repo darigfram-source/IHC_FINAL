@@ -43,6 +43,16 @@ export const Header: React.FC = () => {
           title: 'Gestión de Biblioteca Educativa',
           subtitle: 'Artículos científicos validados para contrarrestar el "bro-science"',
         };
+      case 'normativa':
+        return {
+          title: 'Normativa del profesional',
+          subtitle: 'Resumen informativo de las obligaciones al atender pacientes con NutriMasa',
+        };
+      case 'perfil':
+        return {
+          title: 'Mi perfil profesional',
+          subtitle: 'Lo que ven tus pacientes: nombre, cédula verificada, institución y especialidad',
+        };
       case 'arco':
         return {
           title: 'Derechos ARCO de tus pacientes',

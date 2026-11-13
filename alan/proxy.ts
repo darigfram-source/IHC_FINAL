@@ -36,7 +36,14 @@ export async function proxy(request: NextRequest) {
   const rol = user ? (await obtenerRol(supabase, user.id)).rol : null;
 
   if (pathname.startsWith('/admin')) {
-    if (pathname === '/admin/login') return rol === 'admin' ? redirigir('/admin') : response;
+    if (pathname === '/admin/login' || pathname === '/admin/registro') return rol === 'admin' ? redirigir('/admin') : response;
+    // Alta de nutriólogo a medias: basta la sesión (no es paciente ni nutriólogo activo todavía).
+    if (pathname === '/admin/solicitud' || pathname === '/admin/verificacion') {
+      if (!user) return redirigir('/admin/login', pathname);
+      if (rol === 'admin') return redirigir('/admin');
+      if (rol === 'paciente') return redirigir('/admin/login');
+      return response;
+    }
     if (rol !== 'admin') return redirigir('/admin/login', pathname);
   }
 
