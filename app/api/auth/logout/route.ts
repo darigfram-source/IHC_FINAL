@@ -1,14 +1,8 @@
 import { NextResponse } from 'next/server';
-import { COOKIE_NAME } from '@/lib/auth';
+import { crearClienteServidor } from '@/lib/supabase/server';
 
 export async function POST() {
-  const response = NextResponse.json({ success: true, message: 'Sesión cerrada' });
-  response.cookies.delete(COOKIE_NAME);
-  return response;
-}
-
-export async function GET() {
-  const response = NextResponse.redirect(new URL('/', process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'));
-  response.cookies.delete(COOKIE_NAME);
-  return response;
+  const supabase = await crearClienteServidor();
+  await supabase.auth.signOut();
+  return NextResponse.json({ success: true });
 }

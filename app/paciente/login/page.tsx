@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Dumbbell, ArrowRight, ShieldCheck, AlertCircle, Sparkles, User, Lock, ArrowLeft } from 'lucide-react';
+import { ReenviarConfirmacion } from '@/components/ReenviarConfirmacion';
+import { Dumbbell, ArrowRight, ShieldCheck, AlertCircle, User, Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 export default function PacienteLoginPage() {
   const router = useRouter();
@@ -11,10 +12,19 @@ export default function PacienteLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [ver, setVer] = useState(false);
+  const [confirmado, setConfirmado] = useState(false);
+  const [pideReenvio, setPideReenvio] = useState(false); // cuenta sin confirmar: se ofrece reenviar el correo
+
+  useEffect(() => {
+    // Llegan aquí desde el enlace del correo de confirmación (/auth/callback).
+    setConfirmado(new URLSearchParams(window.location.search).get('confirmado') === '1');
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setPideReenvio(false);
     setLoading(true);
 
     try {
@@ -28,6 +38,7 @@ export default function PacienteLoginPage() {
 
       if (!res.ok || !data.success) {
         setError(data.error || 'Credenciales no válidas. Revisa correo y contraseña.');
+        setPideReenvio(data.codigo === 'email_no_confirmado');
         setLoading(false);
         return;
       }
@@ -36,37 +47,6 @@ export default function PacienteLoginPage() {
       router.refresh();
     } catch (err) {
       setError('Error de conexión con el servidor. Intenta de nuevo.');
-      setLoading(false);
-    }
-  };
-
-  const loginDemo = async (demoEmail: string) => {
-    setEmail(demoEmail);
-    setPassword('Password123!');
-    setLoading(true);
-    setError('');
-
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: demoEmail,
-          password: 'Password123!',
-          expectedRole: 'paciente',
-        }),
-      });
-
-      const data = await res.json();
-      if (data.success) {
-        router.push('/paciente/dashboard');
-        router.refresh();
-      } else {
-        setError(data.error || 'Error al iniciar sesión');
-        setLoading(false);
-      }
-    } catch (err) {
-      setError('Error de conexión con el servidor');
       setLoading(false);
     }
   };
@@ -110,6 +90,17 @@ export default function PacienteLoginPage() {
           </div>
         )}
 
+        {pideReenvio && (
+          <div className="mb-4 -mt-2">
+            <ReenviarConfirmacion correo={email} tema="oscuro" />
+          </div>
+        )}
+
+        {confirmado && (
+          <div className="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs">
+            Correo confirmado. Inicia sesión para continuar.
+          </div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-1.5">
@@ -135,14 +126,28 @@ export default function PacienteLoginPage() {
             <div className="relative">
               <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
-                type="password"
+                type={ver ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-slate-950/70 border border-slate-800 focus:border-emerald-500 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
+                className="w-full bg-slate-950/70 border border-slate-800 focus:border-emerald-500 rounded-xl pl-10 pr-11 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setVer((v) => !v)}
+                aria-label={ver ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-400 transition-colors"
+              >
+                {ver ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
+          </div>
+
+          <div className="text-right -mt-1">
+            <Link href="/recuperar" className="text-xs text-emerald-400 hover:text-emerald-300 underline underline-offset-2">
+              ¿Olvidaste tu contraseña?
+            </Link>
           </div>
 
           <button
@@ -154,32 +159,6 @@ export default function PacienteLoginPage() {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
-
-        {/* Demo Fast Access Buttons */}
-        <div className="mt-6 pt-5 border-t border-slate-800">
-          <p className="text-[11px] font-semibold text-slate-400 mb-2.5 flex items-center gap-1.5">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            Acceso Rápido de Prueba (Pacientes de Demostración):
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => loginDemo('dario@nutrimasa.com')}
-              className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 text-left transition-colors"
-            >
-              <div className="text-xs font-bold text-white">Darío Fuentes</div>
-              <div className="text-[10px] text-emerald-400">78.4 kg · En progreso</div>
-            </button>
-            <button
-              type="button"
-              onClick={() => loginDemo('alan@nutrimasa.com')}
-              className="p-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700/60 text-left transition-colors"
-            >
-              <div className="text-xs font-bold text-white">Alan Salazar</div>
-              <div className="text-[10px] text-amber-400">71.0 kg · Estancado</div>
-            </button>
-          </div>
-        </div>
 
         {/* Registro Link */}
         <div className="mt-5 text-center">

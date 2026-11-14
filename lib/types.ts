@@ -3,7 +3,7 @@
 // Basado en el documento de propuesta académica NutriMasa Pro
 // ============================================================================
 
-export type EstadoPaciente = 'En progreso' | 'Estancado' | 'Peso sube, cargas no';
+export type EstadoPaciente = 'En progreso' | 'Estancado' | 'Peso sube, cargas no' | 'Sin datos';
 export type TendenciaCargas = 'Suben' | 'Sin cambio' | 'Bajan';
 
 export interface Nutriologo {
@@ -63,6 +63,7 @@ export interface Usuario {
   trastorno_conducta_alimentaria: boolean;
   elegible: boolean;
   consentimiento_informado: boolean;
+  consentimiento_fecha?: string | null; // cuándo aceptó el consentimiento informado (ISO)
   
   // Registros históricos asociados
   registros?: RegistroDiario[];
@@ -77,6 +78,10 @@ export interface MensajeChat {
   tipo?: 'texto' | 'sugerencia_suplementacion' | 'ajuste_plan' | 'guia_educativa';
   leido: boolean;
   creado_en: string;
+  /** Fecha original (ISO) del mensaje, para la regla de los 5 minutos. Solo en datos reales. */
+  hora_iso?: string;
+  /** Si el autor lo editó. */
+  editado_en?: string | null;
 }
 
 export interface AjustePlan {

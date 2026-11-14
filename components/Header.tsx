@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useNutriMasa } from '@/lib/NutriMasaContext';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import {
   Users,
   Activity,
@@ -43,6 +44,21 @@ export const Header: React.FC = () => {
           title: 'Gestión de Biblioteca Educativa',
           subtitle: 'Artículos científicos validados para contrarrestar el "bro-science"',
         };
+      case 'normativa':
+        return {
+          title: 'Normativa del profesional',
+          subtitle: 'Resumen informativo de las obligaciones al atender pacientes con NutriMasa',
+        };
+      case 'perfil':
+        return {
+          title: 'Mi perfil profesional',
+          subtitle: 'Lo que ven tus pacientes: nombre, cédula verificada, institución y especialidad',
+        };
+      case 'arco':
+        return {
+          title: 'Derechos ARCO de tus pacientes',
+          subtitle: 'Solicitudes de acceso, rectificación, cancelación y oposición (LFPDPPP)',
+        };
     }
   };
 
@@ -79,7 +95,7 @@ export const Header: React.FC = () => {
           <span>Nutrición Deportiva e Hipertrofia</span>
         </div>
 
-
+        <ThemeToggle variant="compact" />
       </div>
     </header>
   );

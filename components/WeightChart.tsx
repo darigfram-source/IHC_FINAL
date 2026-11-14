@@ -88,7 +88,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
           y1={paddingY}
           x2={width - paddingX}
           y2={paddingY}
-          stroke="#e2e8f0"
+          stroke="var(--border)"
           strokeDasharray="3 3"
           strokeWidth="0.8"
         />
@@ -97,7 +97,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
           y1={height - paddingY}
           x2={width - paddingX}
           y2={height - paddingY}
-          stroke="#cbd5e1"
+          stroke="var(--border-strong)"
           strokeWidth="1"
         />
 
@@ -136,7 +136,7 @@ export const WeightChart: React.FC<WeightChartProps> = ({
               cx={pt.x}
               cy={pt.y}
               r={hoveredPoint?.id === pt.record.id ? 5 : 3.5}
-              fill="#ffffff"
+              fill="var(--surface)"
               stroke="#059669"
               strokeWidth="2"
               className="transition-all cursor-pointer hover:r-5"

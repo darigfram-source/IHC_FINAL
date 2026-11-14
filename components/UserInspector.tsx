@@ -70,6 +70,8 @@ export const UserInspector: React.FC = () => {
                 ? 'bg-emerald-100 text-emerald-800'
                 : selectedUsuario.estado === 'Estancado'
                 ? 'bg-amber-100 text-amber-800'
+                : selectedUsuario.estado === 'Sin datos'
+                ? 'bg-slate-100 text-slate-600'
                 : 'bg-rose-100 text-rose-800'
             }`}
           >

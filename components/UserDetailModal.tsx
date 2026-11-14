@@ -194,23 +194,21 @@ export const UserDetailModal: React.FC = () => {
               {/* Distribución de macros */}
               <div className="border border-slate-200 rounded-xl p-4 bg-slate-50">
                 <h5 className="font-bold text-slate-800 mb-3">Distribución de Macronutrientes y Suplementación</h5>
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="bg-white p-3 rounded-lg border border-slate-200">
-                    <span className="text-slate-400 block text-[10px]">Carbohidratos Peri-Entreno</span>
-                    <span className="text-base font-bold text-slate-900">{selectedUsuario.carbs_peri_entreno_g} g</span>
-                    <span className="text-[10px] text-slate-500 block">60-90m pre-entreno</span>
-                  </div>
+                <div className="grid grid-cols-2 gap-3 text-center">
                   <div className="bg-white p-3 rounded-lg border border-slate-200">
                     <span className="text-slate-400 block text-[10px]">Grasas Totales</span>
-                    <span className="text-base font-bold text-slate-900">{selectedUsuario.grasas_g} g</span>
-                    <span className="text-[10px] text-slate-500 block">Ácidos grasos esenciales</span>
+                    <span className="text-base font-bold text-slate-900">{Number(selectedUsuario.grasas_g) > 0 ? `${selectedUsuario.grasas_g} g` : 'Sin definir'}</span>
+                    <span className="text-[10px] text-slate-500 block">Solo si las defines en “Ajustar plan”</span>
                   </div>
                   <div className="bg-white p-3 rounded-lg border border-slate-200">
-                    <span className="text-slate-400 block text-[10px]">Suplemento Validado</span>
-                    <span className="text-xs font-bold text-teal-800 block mt-1">Creatina 5g/día</span>
-                    <span className="text-[10px] text-teal-600 block">Urdampilleta (2012)</span>
+                    <span className="text-slate-400 block text-[10px]">Suplementación indicada</span>
+                    <span className="text-xs font-bold text-teal-800 block mt-1">
+                      {selectedUsuario.suplementacion_sugerida || 'Sin indicación registrada'}
+                    </span>
+                    <span className="text-[10px] text-slate-500 block">Se define en “Ajustar plan”</span>
                   </div>
                 </div>
+                <p className="text-[11px] text-slate-500 mt-3 text-left">Carbohidratos peri-entreno e hidratación: indícalos por el chat; el paciente ve tus últimas indicaciones en su inicio.</p>
               </div>
             </div>
           )}
@@ -256,34 +254,31 @@ export const UserDetailModal: React.FC = () => {
           {activeTab === 'elegibilidad' && (
             <div className="space-y-4 text-xs text-slate-700">
               <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-slate-900">Cuestionario de Elegibilidad Inicial (Filtro Clínico)</span>
-                  <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                    Apto para Hipertrofia
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-bold text-slate-900">Cuestionario de elegibilidad inicial (filtro clínico)</span>
+                  <span
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                      selectedUsuario.elegible === false ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'
+                    }`}
+                  >
+                    {selectedUsuario.elegible === false ? 'No apto' : 'Aprobado'}
                   </span>
                 </div>
                 <p className="text-slate-600 leading-relaxed text-xs">
-                  Conforme a los Límites de la propuesta (Límite 1), las personas con enfermedad renal, diabetes, embarazo o TCA son canalizadas a un profesional médico especializado.
+                  Quien marca alguna de estas condiciones no puede continuar y se le canaliza con un profesional de la salud: enfermedad renal o hepática crónica,
+                  diabetes, embarazo o lactancia, y trastorno de la conducta alimentaria (se requiere alta médica previa). La plataforma no guarda esas respuestas
+                  una por una, solo el resultado del cuestionario.
                 </p>
               </div>
-
-              <div className="space-y-2">
-                <div className="p-3 bg-white border border-slate-200 rounded-lg flex items-center justify-between">
-                  <span>Enfermedad renal o diabetes previa:</span>
-                  <span className="font-bold text-emerald-700">No reportada (Negativo)</span>
-                </div>
-                <div className="p-3 bg-white border border-slate-200 rounded-lg flex items-center justify-between">
-                  <span>Embarazo o periodo de lactancia:</span>
-                  <span className="font-bold text-emerald-700">No reportado (Negativo)</span>
-                </div>
-                <div className="p-3 bg-white border border-slate-200 rounded-lg flex items-center justify-between">
-                  <span>Trastorno de la conducta alimentaria (TCA):</span>
-                  <span className="font-bold text-emerald-700">No reportado (Negativo)</span>
-                </div>
-                <div className="p-3 bg-white border border-slate-200 rounded-lg flex items-center justify-between">
-                  <span>Consentimiento informado firmado (LFPDPPP 2025):</span>
-                  <span className="font-bold text-emerald-700">Aceptado digitalmente ✓</span>
-                </div>
+              <div className="p-3 bg-white border border-slate-200 rounded-lg flex items-center justify-between gap-3">
+                <span>Consentimiento informado (LFPDPPP):</span>
+                <span className={`font-bold ${selectedUsuario.consentimiento_informado ? 'text-emerald-700' : 'text-slate-500'}`}>
+                  {selectedUsuario.consentimiento_informado
+                    ? selectedUsuario.consentimiento_fecha && !isNaN(new Date(selectedUsuario.consentimiento_fecha).getTime())
+                      ? `Aceptado el ${new Date(selectedUsuario.consentimiento_fecha).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })} ✓`
+                      : 'Aceptado digitalmente ✓'
+                    : 'Sin dato'}
+                </span>
               </div>
             </div>
           )}

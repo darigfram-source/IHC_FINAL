@@ -1,6 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
+import { metricasReporte } from './reporte';
+import { tendencia as tendenciaMotor, ETIQUETA_ESTADO } from './motor-reglas';
 import {
   Nutriologo,
   Usuario,
@@ -33,8 +36,8 @@ interface NutriMasaContextType {
   mensajes: MensajeChat[];
   articulos: ArticuloEducativo[];
   reportes: Reporte[];
-  activeTab: 'usuarios' | 'mensajes' | 'reportes' | 'biblioteca';
-  setActiveTab: (tab: 'usuarios' | 'mensajes' | 'reportes' | 'biblioteca') => void;
+  activeTab: 'usuarios' | 'mensajes' | 'reportes' | 'biblioteca' | 'arco' | 'normativa' | 'perfil';
+  setActiveTab: (tab: 'usuarios' | 'mensajes' | 'reportes' | 'biblioteca' | 'arco' | 'normativa' | 'perfil') => void;
   
   // Modales
   isDetailModalOpen: boolean;
@@ -48,17 +51,28 @@ interface NutriMasaContextType {
   isReportModalOpen: boolean;
   setIsReportModalOpen: (open: boolean) => void;
   
-  // Acciones
+  // Panel real (nutriólogo con sesión): datos que vienen de Supabase
+  modoReal: boolean;
+  cargandoPanel: boolean;
+  errorPanel: string | null;
+  limpiarErrorPanel: () => void;
+  refrescarPanel: () => Promise<void>;
+
+  // Acciones. updatePlan devuelve null si salió bien o el texto del error.
   updatePlan: (data: {
     usuarioId: string;
     superavit_kcal: number;
     proteina_g_kg: number;
-    carbs_peri_entreno_g: number;
+    carbs_peri_entreno_g?: number; // ya no se captura: se indica en el chat
     grasas_g: number;
     motivo: string;
-  }) => void;
+    suplementacion?: string;
+  }) => Promise<string | null>;
   enviarMensaje: (texto: string, tipo?: MensajeChat['tipo'], usuarioId?: string) => void;
   enviarMensajePaciente: (texto: string, usuarioId?: string) => void;
+  /** Editan o eliminan un mensaje propio del nutriólogo (5 minutos). Devuelven null si salió bien o el error. */
+  editarMensaje: (id: string, texto: string) => Promise<string | null>;
+  eliminarMensaje: (id: string) => Promise<string | null>;
   agregarRegistroDiario: (usuarioId: string, registro: Omit<RegistroDiario, 'id' | 'usuario_id'>) => void;
   actualizarElegibilidad: (usuarioId: string, datos: Partial<Usuario>) => void;
   toggleArticuloVisibility: (articuloId: string) => void;
@@ -85,7 +99,14 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [mensajes, setMensajes] = useState<MensajeChat[]>(INITIAL_MENSAJES);
   const [articulos, setArticulos] = useState<ArticuloEducativo[]>(INITIAL_ARTICULOS);
   const [reportes, setReportes] = useState<Reporte[]>(INITIAL_REPORTES);
-  const [activeTab, setActiveTab] = useState<'usuarios' | 'mensajes' | 'reportes' | 'biblioteca'>('usuarios');
+  const [activeTab, setActiveTab] = useState<'usuarios' | 'mensajes' | 'reportes' | 'biblioteca' | 'arco' | 'normativa' | 'perfil'>('usuarios');
+
+  // Modo real: dentro de /admin con sesión de nutriólogo verificado, los datos vienen de Supabase.
+  const pathname = usePathname();
+  const enAdmin = pathname?.startsWith('/admin') && !pathname.startsWith('/admin/login');
+  const [modoReal, setModoReal] = useState(false);
+  const [cargandoPanel, setCargandoPanel] = useState<boolean>(false);
+  const [errorPanel, setErrorPanel] = useState<string | null>(null);
 
   // Modales
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -94,9 +115,9 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
-  // Carga inicial de localStorage para persistencia
+  // Carga inicial de localStorage para persistencia (solo datos de demostración)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !enAdmin) {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
@@ -112,11 +133,12 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         console.error('Error cargando estado guardado:', e);
       }
     }
-  }, []);
+  }, [enAdmin]);
 
-  // Guardado automático en localStorage
+  // Guardado automático en localStorage. Con datos reales NO se guarda nada de pacientes
+  // en el navegador (son datos de salud).
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !modoReal && !enAdmin) {
       try {
         const stateToSave = {
           usuarios,
@@ -131,7 +153,93 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         console.error('Error guardando estado:', e);
       }
     }
-  }, [usuarios, mensajes, articulos, reportes, selectedUsuarioId, activePatientId]);
+  }, [usuarios, mensajes, articulos, reportes, selectedUsuarioId, activePatientId, modoReal, enAdmin]);
+
+  // Fecha local legible ('YYYY-MM-DD HH:mm:ss'), como la usan las vistas del panel.
+  const fechaLocal = (iso: string) => {
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return String(iso).replace('T', ' ').slice(0, 19);
+    const p = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  };
+
+  const refrescarPanel = useCallback(async () => {
+    try {
+      const res = await fetch('/api/nutriologo/panel', { cache: 'no-store' });
+      if (res.status === 401) {
+        setModoReal(false);
+        return;
+      }
+      const j = await res.json();
+      if (!res.ok || !j.success) throw new Error(j.error || 'Error');
+      const d = j.data;
+      setNutriologo(d.nutriologo);
+      setUsuarios(d.usuarios);
+      setMensajes(
+        d.mensajes.map((m: MensajeChat) => ({ ...m, hora_iso: m.creado_en, creado_en: fechaLocal(m.creado_en) }))
+      );
+      setReportes(d.reportes);
+      setArticulos(d.articulos);
+      setSelectedUsuarioId((prev) =>
+        d.usuarios.some((u: Usuario) => u.id === prev) ? prev : d.usuarios[0]?.id ?? ''
+      );
+      setModoReal(true);
+      setIsAuthenticated(true);
+      setErrorPanel(null);
+    } catch {
+      setErrorPanel('No se pudo conectar con la base. Se reintenta solo.');
+    } finally {
+      setCargandoPanel(false);
+    }
+  }, []);
+
+  // Carga al entrar a /admin y sondeo cada 30 s (como la app) mientras la pestaña está visible.
+  useEffect(() => {
+    if (!enAdmin) {
+      setModoReal(false);
+      return;
+    }
+    setCargandoPanel(true);
+    refrescarPanel();
+    const t = setInterval(() => {
+      if (document.visibilityState === 'visible') refrescarPanel();
+    }, 30_000);
+    return () => clearInterval(t);
+  }, [enAdmin, refrescarPanel]);
+
+  // Al abrir un chat con mensajes sin leer, se marcan como leídos.
+  useEffect(() => {
+    if (!modoReal || activeTab !== 'mensajes' || !selectedUsuarioId) return;
+    const hayPendientes = mensajes.some(
+      (m) => m.usuario_id === selectedUsuarioId && m.remitente === 'usuario' && !m.leido
+    );
+    if (!hayPendientes) return;
+    setMensajes((prev) =>
+      prev.map((m) =>
+        m.usuario_id === selectedUsuarioId && m.remitente === 'usuario' ? { ...m, leido: true } : m
+      )
+    );
+    fetch('/api/nutriologo/mensajes', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario_id: selectedUsuarioId }),
+    }).catch(() => {});
+  }, [modoReal, activeTab, selectedUsuarioId, mensajes]);
+
+  const llamar = async (url: string, method: string, body: unknown) => {
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok || !j.success) return { ok: false as const, error: (j.error as string) || 'Error de conexión', j };
+      return { ok: true as const, error: null, j };
+    } catch {
+      return { ok: false as const, error: 'No se pudo conectar. Revisa tu internet.', j: {} };
+    }
+  };
 
   const selectedUsuario = usuarios.find((u) => u.id === selectedUsuarioId) || usuarios[0] || null;
   const activePatient = usuarios.find((u) => u.id === activePatientId) || usuarios[0] || null;
@@ -170,16 +278,10 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           }
         }
 
-        // Evaluar estado clínico
-        let nuevoEstado = user.estado;
-        const pesoSubio = nuevoRegistro.peso_ayunas > user.peso_actual;
-        if (pesoSubio && tendencia === 'Sin cambio') {
-          nuevoEstado = 'Peso sube, cargas no';
-        } else if (tendencia === 'Suben') {
-          nuevoEstado = 'En progreso';
-        } else if (tendencia === 'Sin cambio' && !pesoSubio) {
-          nuevoEstado = 'Estancado';
-        }
+        // Estado clínico: el mismo motor de reglas que usa la app (últimos 14 días, mínimo 3 registros en 6 días)
+        const nuevoEstado = ETIQUETA_ESTADO[
+          tendenciaMotor([...registrosActuales, nuevoRegistro], new Date(`${nuevoRegistro.fecha}T12:00:00`)).estado
+        ];
 
         // Recalcular dinámicamente según el nuevo peso en ayunas
         const nuevoPeso = nuevoRegistro.peso_ayunas;
@@ -201,21 +303,44 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     );
   };
 
-  const updatePlan = ({
+  const updatePlan = async ({
     usuarioId,
     superavit_kcal,
     proteina_g_kg,
     carbs_peri_entreno_g,
     grasas_g,
     motivo,
+    suplementacion,
   }: {
     usuarioId: string;
     superavit_kcal: number;
     proteina_g_kg: number;
-    carbs_peri_entreno_g: number;
+    carbs_peri_entreno_g?: number; // ya no se captura: se indica en el chat
     grasas_g: number;
     motivo: string;
-  }) => {
+    suplementacion?: string;
+  }): Promise<string | null> => {
+    if (modoReal) {
+      const r = await llamar('/api/nutriologo/plan', 'POST', {
+        usuario_id: usuarioId,
+        superavit_kcal,
+        proteina_g_kg,
+        grasas_g,
+        motivo,
+        suplementacion,
+      });
+      if (!r.ok) return r.error;
+      if (r.j?.grasasNoGuardadas) {
+        await refrescarPanel();
+        return 'El plan se guardó, pero la base no tiene la columna de grasas (ejecuta supabase_macros.sql en Supabase).';
+      }
+      if (r.j?.suplementacionNoGuardada) {
+        await refrescarPanel();
+        return 'El plan se guardó, pero la base no permitió guardar la suplementación. Revisa tus políticas RLS de usuarios.';
+      }
+      await refrescarPanel();
+      return null;
+    }
     setUsuarios((prev) =>
       prev.map((user) => {
         if (user.id !== usuarioId) return user;
@@ -225,18 +350,14 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           (nuevasCaloriasTotales - proteina_g_kg * user.peso_actual * 4 - grasas_g * 9) / 4
         );
 
-        let nuevoEstado = user.estado;
-        if (user.estado === 'Estancado') {
-          nuevoEstado = 'En progreso';
-        } else if (user.estado === 'Peso sube, cargas no' && superavit_kcal <= 400) {
-          nuevoEstado = 'En progreso';
-        }
+        // Ajustar el plan no cambia el estado: el estado sale solo de los registros del paciente.
+        const nuevoEstado = user.estado;
 
         return {
           ...user,
           superavit_kcal,
           proteina_g_kg,
-          carbs_peri_entreno_g,
+          carbs_peri_entreno_g: carbs_peri_entreno_g ?? user.carbs_peri_entreno_g,
           grasas_g,
           carbohidratos_g: Math.max(200, nuevosCarbsG),
           calorias_totales: nuevasCaloriasTotales,
@@ -258,6 +379,7 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       creado_en: new Date().toISOString().replace('T', ' ').slice(0, 19),
     };
     setMensajes((prev) => [...prev, nuevoMensaje]);
+    return null;
   };
 
   const enviarMensaje = (
@@ -267,6 +389,29 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   ) => {
     const target = targetUserId || selectedUsuarioId;
     if (!texto.trim() || !target) return;
+
+    if (modoReal) {
+      const temporal: MensajeChat = {
+        id: `tmp-${Date.now()}`,
+        usuario_id: target,
+        nutriologo_id: nutriologo?.id || '',
+        remitente: 'nutriologo',
+        tipo,
+        contenido: texto,
+        leido: false,
+        creado_en: fechaLocal(new Date().toISOString()),
+      };
+      setMensajes((prev) => [...prev, temporal]);
+      llamar('/api/nutriologo/mensajes', 'POST', { usuario_id: target, contenido: texto, tipo }).then((r) => {
+        if (!r.ok) {
+          setMensajes((prev) => prev.filter((m) => m.id !== temporal.id));
+          setErrorPanel(`No se envió el mensaje: ${r.error}`);
+        } else {
+          refrescarPanel();
+        }
+      });
+      return;
+    }
 
     const nuevoMensaje: MensajeChat = {
       id: `msg-${Date.now()}`,
@@ -280,6 +425,24 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     setMensajes((prev) => [...prev, nuevoMensaje]);
+  };
+
+  const editarMensaje = async (id: string, texto: string): Promise<string | null> => {
+    const limpio = texto.trim();
+    if (!limpio) return 'El mensaje no puede quedar vacío.';
+    if (!modoReal) return 'Solo se puede editar en el panel conectado.';
+    const r = await llamar('/api/nutriologo/mensajes', 'PATCH', { id, contenido: limpio });
+    if (!r.ok) return r.error;
+    await refrescarPanel();
+    return null;
+  };
+
+  const eliminarMensaje = async (id: string): Promise<string | null> => {
+    if (!modoReal) return 'Solo se puede eliminar en el panel conectado.';
+    const r = await llamar('/api/nutriologo/mensajes', 'DELETE', { id });
+    if (!r.ok) return r.error;
+    await refrescarPanel();
+    return null;
   };
 
   const enviarMensajePaciente = (texto: string, usuarioId?: string) => {
@@ -301,12 +464,34 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const toggleArticuloVisibility = (articuloId: string) => {
+    if (modoReal) {
+      const actual = articulos.find((a) => a.id === articuloId);
+      if (!actual) return;
+      setArticulos((prev) =>
+        prev.map((a) => (a.id === articuloId ? { ...a, visible_en_app: !a.visible_en_app } : a))
+      );
+      llamar('/api/nutriologo/articulos', 'PATCH', {
+        id: articuloId,
+        visible_en_app: !actual.visible_en_app,
+      }).then((r) => {
+        if (!r.ok) setErrorPanel(`No se cambió la visibilidad: ${r.error}`);
+        refrescarPanel();
+      });
+      return;
+    }
     setArticulos((prev) =>
       prev.map((art) => (art.id === articuloId ? { ...art, visible_en_app: !art.visible_en_app } : art))
     );
   };
 
   const agregarArticulo = (articuloData: Omit<ArticuloEducativo, 'id' | 'creado_en'>) => {
+    if (modoReal) {
+      llamar('/api/nutriologo/articulos', 'POST', articuloData).then((r) => {
+        if (!r.ok) setErrorPanel(`No se guardó el artículo: ${r.error}`);
+        refrescarPanel();
+      });
+      return;
+    }
     const nuevo: ArticuloEducativo = {
       ...articuloData,
       id: `art-${Date.now()}`,
@@ -316,8 +501,24 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const generarReporte = (reporteData: Omit<Reporte, 'id' | 'creado_en' | 'nutriologo_id'>): Reporte => {
+    // Con datos reales las cifras salen de los registros del paciente (no de valores fijos).
+    let datos = reporteData;
+    if (modoReal) {
+      const u = usuarios.find((x) => x.id === reporteData.usuario_id);
+      const m = metricasReporte(u?.registros ?? [], reporteData.periodo_tipo);
+      if (m) datos = { ...reporteData, ...m };
+      llamar('/api/nutriologo/reportes', 'POST', {
+        usuario_id: reporteData.usuario_id,
+        periodo_tipo: reporteData.periodo_tipo,
+        evaluacion_clinica: reporteData.evaluacion_clinica,
+        recomendaciones_siguientes: reporteData.recomendaciones_siguientes,
+      }).then((r) => {
+        if (!r.ok) setErrorPanel(`No se guardó el reporte: ${r.error}`);
+        refrescarPanel();
+      });
+    }
     const nuevo: Reporte = {
-      ...reporteData,
+      ...datos,
       id: `rep-${Date.now()}`,
       nutriologo_id: nutriologo?.id || 'nut-01',
       creado_en: new Date().toISOString().replace('T', ' ').slice(0, 19),
@@ -333,10 +534,19 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   const logout = () => {
+    if (modoReal) {
+      fetch('/api/auth/logout', { method: 'POST' })
+        .catch(() => {})
+        .finally(() => {
+          window.location.href = '/admin/login';
+        });
+      return;
+    }
     setIsAuthenticated(false);
   };
 
   const resetToInitial = () => {
+    if (modoReal) return; // con datos reales no hay "demo" que restablecer
     setUsuarios(INITIAL_USUARIOS);
     setMensajes(INITIAL_MENSAJES);
     setArticulos(INITIAL_ARTICULOS);
@@ -376,9 +586,16 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         setIsLegalModalOpen,
         isReportModalOpen,
         setIsReportModalOpen,
+        modoReal,
+        cargandoPanel,
+        errorPanel,
+        limpiarErrorPanel: () => setErrorPanel(null),
+        refrescarPanel,
         updatePlan,
         enviarMensaje,
         enviarMensajePaciente,
+        editarMensaje,
+        eliminarMensaje,
         agregarRegistroDiario,
         actualizarElegibilidad,
         toggleArticuloVisibility,

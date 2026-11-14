@@ -9,6 +9,8 @@ import {
   BookOpen,
   Dumbbell,
   ShieldCheck,
+  Scale,
+  UserCog,
   LogOut,
   RotateCcw,
   Smartphone,
@@ -22,6 +24,8 @@ export const Sidebar: React.FC = () => {
     setActiveTab,
     logout,
     resetToInitial,
+    modoReal,
+    nutriologo,
     setIsLegalModalOpen,
     mensajes,
     usuarios,
@@ -33,7 +37,7 @@ export const Sidebar: React.FC = () => {
   ).length;
 
   // Contar alertas en usuarios
-  const alertCount = usuarios.filter((u) => u.estado !== 'En progreso').length;
+  const alertCount = usuarios.filter((u) => u.estado === 'Estancado' || u.estado === 'Peso sube, cargas no').length;
 
   return (
     <aside className="w-64 bg-[#0a1a14] text-white flex flex-col h-screen select-none shrink-0 border-r border-[#153428] shadow-xl">
@@ -141,6 +145,22 @@ export const Sidebar: React.FC = () => {
           <span className="text-[10px] text-emerald-300/60 font-semibold">Ciencia</span>
         </button>
 
+        {/* 5. Derechos ARCO */}
+        <button
+          onClick={() => setActiveTab('arco')}
+          className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'arco'
+              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-950/40 font-semibold'
+              : 'text-emerald-100/80 hover:bg-[#122e23] hover:text-white'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <ShieldCheck className="w-4 h-4" />
+            <span>Derechos ARCO</span>
+          </div>
+          <span className="text-[10px] text-emerald-300/60 font-semibold">LFPDPPP</span>
+        </button>
+
         {/* Sección de cumplimiento normativo */}
         <div className="pt-6 pb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-emerald-300/50">
           Normativa de Salud
@@ -152,33 +172,60 @@ export const Sidebar: React.FC = () => {
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <span>Aviso LFPDPPP & Salud</span>
         </button>
+        <button
+          onClick={() => setActiveTab('normativa')}
+          className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs transition-all text-left ${
+            activeTab === 'normativa' ? 'bg-emerald-600 text-white font-semibold' : 'text-emerald-200/70 hover:bg-[#122e23] hover:text-white'
+          }`}
+        >
+          <Scale className="w-4 h-4 text-emerald-400" />
+          <span>Normativa del profesional</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('perfil')}
+          className={`w-full flex items-center gap-3 px-3.5 py-2 rounded-lg text-xs transition-all text-left ${
+            activeTab === 'perfil' ? 'bg-emerald-600 text-white font-semibold' : 'text-emerald-200/70 hover:bg-[#122e23] hover:text-white'
+          }`}
+        >
+          <UserCog className="w-4 h-4 text-emerald-400" />
+          <span>Mi perfil profesional</span>
+        </button>
       </div>
 
       {/* Footer del Nutriólogo (Actualizado a Nutriólogo Admin y CED-ADMIN-001) */}
       <div className="p-3.5 border-t border-[#16382a] bg-[#0c1f18]">
         <div className="flex items-center gap-3 mb-3 p-2 bg-[#122e23] rounded-lg border border-[#1b4333]">
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-400/30">
-            AD
+            {modoReal && nutriologo
+              ? nutriologo.nombre
+                  .split(/\s+/)
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((p) => p[0]?.toUpperCase())
+                  .join('') || 'NM'
+              : 'AD'}
           </div>
           <div className="overflow-hidden">
             <p className="text-xs font-semibold text-white truncate">
-              Nutriólogo Admin
+              {modoReal && nutriologo ? nutriologo.nombre : 'Nutriólogo Admin'}
             </p>
             <p className="text-[10px] text-emerald-300/70 truncate">
-              Céd. CED-ADMIN-001
+              Céd. {modoReal && nutriologo ? nutriologo.cedula_profesional : 'CED-ADMIN-001'}
             </p>
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-1 text-[11px] text-emerald-300/60">
-          <button
-            onClick={resetToInitial}
-            title="Restablecer datos predeterminados"
-            className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-[#16382a] rounded hover:text-emerald-200 transition-colors"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reiniciar demo</span>
-          </button>
+          {!modoReal && (
+            <button
+              onClick={resetToInitial}
+              title="Restablecer datos predeterminados"
+              className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-[#16382a] rounded hover:text-emerald-200 transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reiniciar demo</span>
+            </button>
+          )}
           <button
             onClick={logout}
             title="Cerrar sesión"

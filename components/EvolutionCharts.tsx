@@ -77,6 +77,8 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
                 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                 : usuario.estado === 'Estancado'
                 ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                : usuario.estado === 'Sin datos'
+                ? 'bg-slate-100 text-slate-600 border border-slate-300'
                 : 'bg-rose-100 text-rose-800 border border-rose-300'
             }`}
           >
@@ -131,9 +133,9 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
               </defs>
 
               {/* Guías */}
-              <line x1="30" y1="20" x2="480" y2="20" stroke="#f1f5f9" strokeWidth="1" />
-              <line x1="30" y1="60" x2="480" y2="60" stroke="#f1f5f9" strokeWidth="1" />
-              <line x1="30" y1="100" x2="480" y2="100" stroke="#e2e8f0" strokeWidth="1" />
+              <line x1="30" y1="20" x2="480" y2="20" stroke="var(--border-subtle)" strokeWidth="1" />
+              <line x1="30" y1="60" x2="480" y2="60" stroke="var(--border-subtle)" strokeWidth="1" />
+              <line x1="30" y1="100" x2="480" y2="100" stroke="var(--border)" strokeWidth="1" />
 
               {/* Trazo */}
               {(() => {
@@ -163,13 +165,13 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
                     <path d={d} fill="none" stroke="#059669" strokeWidth="2.5" />
                     {pts.map((p, i) => (
                       <g key={i}>
-                        <circle cx={p.x} cy={p.y} r="4" fill="#ffffff" stroke="#047857" strokeWidth="2" />
+                        <circle cx={p.x} cy={p.y} r="4" fill="var(--surface)" stroke="#047857" strokeWidth="2" />
                         <text
                           x={p.x}
                           y={p.y - 8}
                           fontSize="10"
                           textAnchor="middle"
-                          fill="#065f46"
+                          fill="var(--primary-text)"
                           fontWeight="bold"
                         >
                           {p.val}k
@@ -215,9 +217,9 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
           <div className="h-44 w-full pt-2">
             <svg viewBox="0 0 500 130" className="w-full h-full overflow-visible">
               {/* Guías */}
-              <line x1="30" y1="20" x2="480" y2="20" stroke="#f1f5f9" strokeWidth="1" />
-              <line x1="30" y1="60" x2="480" y2="60" stroke="#f1f5f9" strokeWidth="1" />
-              <line x1="30" y1="100" x2="480" y2="100" stroke="#e2e8f0" strokeWidth="1" />
+              <line x1="30" y1="20" x2="480" y2="20" stroke="var(--border-subtle)" strokeWidth="1" />
+              <line x1="30" y1="60" x2="480" y2="60" stroke="var(--border-subtle)" strokeWidth="1" />
+              <line x1="30" y1="100" x2="480" y2="100" stroke="var(--border)" strokeWidth="1" />
 
               {(() => {
                 const maxLoad = 135;
@@ -247,8 +249,8 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
 
                     {ptsSquat.map((p, i) => (
                       <g key={`sq-${i}`}>
-                        <circle cx={p.x} cy={p.y} r="3.5" fill="#ffffff" stroke="#059669" strokeWidth="2" />
-                        <text x={p.x} y={p.y - 7} fontSize="9" textAnchor="middle" fill="#047857" fontWeight="bold">
+                        <circle cx={p.x} cy={p.y} r="3.5" fill="var(--surface)" stroke="#059669" strokeWidth="2" />
+                        <text x={p.x} y={p.y - 7} fontSize="9" textAnchor="middle" fill="var(--primary-text)" fontWeight="bold">
                           {p.val}kg
                         </text>
                       </g>
@@ -256,8 +258,8 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
 
                     {ptsBench.map((p, i) => (
                       <g key={`bc-${i}`}>
-                        <circle cx={p.x} cy={p.y} r="3.5" fill="#ffffff" stroke="#2563eb" strokeWidth="2" />
-                        <text x={p.x} y={p.y + 14} fontSize="9" textAnchor="middle" fill="#1d4ed8" fontWeight="bold">
+                        <circle cx={p.x} cy={p.y} r="3.5" fill="var(--surface)" stroke="#2563eb" strokeWidth="2" />
+                        <text x={p.x} y={p.y + 14} fontSize="9" textAnchor="middle" fill="var(--cyan-text)" fontWeight="bold">
                           {p.val}kg
                         </text>
                         <text x={p.x} y="115" fontSize="9" textAnchor="middle" fill="#94a3b8">

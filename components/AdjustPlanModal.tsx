@@ -24,17 +24,18 @@ export const AdjustPlanModal: React.FC = () => {
 
   const [superavitKcal, setSuperavitKcal] = useState<number>(450);
   const [proteinaGKg, setProteinaGKg] = useState<number>(1.75);
-  const [carbsPeriEntreno, setCarbsPeriEntreno] = useState<number>(75);
   const [grasasG, setGrasasG] = useState<number>(68);
   const [motivo, setMotivo] = useState<string>('');
+  const [suplementacion, setSuplementacion] = useState<string>('');
   const [exito, setExito] = useState(false);
+  const [errorGuardar, setErrorGuardar] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedUsuario) {
       setSuperavitKcal(selectedUsuario.superavit_kcal || 450);
       setProteinaGKg(selectedUsuario.proteina_g_kg || 1.75);
-      setCarbsPeriEntreno(selectedUsuario.carbs_peri_entreno_g || 70);
       setGrasasG(selectedUsuario.grasas_g || 68);
+      setSuplementacion(selectedUsuario.suplementacion_sugerida || '');
 
       if (selectedUsuario.estado === 'Estancado') {
         setMotivo(
@@ -65,16 +66,21 @@ export const AdjustPlanModal: React.FC = () => {
 
   const isProteinaExcesiva = proteinaGKg > 2.0;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    updatePlan({
+    setErrorGuardar(null);
+    const error = await updatePlan({
       usuarioId: selectedUsuario.id,
       superavit_kcal: superavitKcal,
       proteina_g_kg: proteinaGKg,
-      carbs_peri_entreno_g: carbsPeriEntreno,
       grasas_g: grasasG,
       motivo,
+      suplementacion,
     });
+    if (error) {
+      setErrorGuardar(error);
+      return;
+    }
 
     setExito(true);
     setTimeout(() => {
@@ -201,40 +207,22 @@ export const AdjustPlanModal: React.FC = () => {
             )}
           </div>
 
-          {/* Control 3: Carbohidratos Peri-Entrenamiento y Grasas */}
-          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                Carbos Peri-Entreno (g)
-              </label>
-              <input
-                type="number"
-                min="40"
-                max="150"
-                value={carbsPeriEntreno}
-                onChange={(e) => setCarbsPeriEntreno(Number(e.target.value))}
-                className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-              />
-              <span className="text-[10px] text-slate-400 mt-0.5 block">
-                60-90m pre y post-entreno
-              </span>
-            </div>
-            <div>
-              <label className="text-xs font-bold text-slate-700 block mb-1">
-                Grasas Saludables (g)
-              </label>
-              <input
-                type="number"
-                min="40"
-                max="120"
-                value={grasasG}
-                onChange={(e) => setGrasasG(Number(e.target.value))}
-                className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-              />
-              <span className="text-[10px] text-slate-400 mt-0.5 block">
-                ~1.0 g / kg de peso
-              </span>
-            </div>
+          {/* Control 3: Grasas. Los carbohidratos peri-entreno y la hidratación los indicas por el chat: el paciente ve tus últimas indicaciones. */}
+          <div className="pt-2 border-t border-slate-100">
+            <label className="text-xs font-bold text-slate-700 block mb-1">
+              Grasas Saludables (g)
+            </label>
+            <input
+              type="number"
+              min="40"
+              max="120"
+              value={grasasG}
+              onChange={(e) => setGrasasG(Number(e.target.value))}
+              className="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
+            />
+            <span className="text-[10px] text-slate-400 mt-0.5 block">
+              ~1.0 g / kg de peso. Los carbohidratos peri-entreno y la hidratación indícalos en el chat.
+            </span>
           </div>
 
           {/* Resumen del nuevo balance metabólico */}
@@ -262,6 +250,25 @@ export const AdjustPlanModal: React.FC = () => {
             </div>
           </div>
 
+          {/* Suplementación: solo lo que el nutriólogo indique; vacío = el paciente ve "Pendiente de tu nutriólogo" */}
+          <div>
+            <label htmlFor="suplementacion" className="text-xs font-bold text-slate-700 block mb-1">
+              Suplementación indicada al paciente (opcional)
+            </label>
+            <input
+              id="suplementacion"
+              type="text"
+              maxLength={200}
+              value={suplementacion}
+              onChange={(e) => setSuplementacion(e.target.value)}
+              className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 text-slate-800"
+              placeholder="Ej.: Creatina monohidratada 3–5 g al día (déjalo vacío si no indicas ninguna)"
+            />
+            <p className="text-[10px] text-slate-400 mt-1">
+              Si lo dejas vacío, el paciente ve “Pendiente de tu nutriólogo”. Nada se indica por defecto.
+            </p>
+          </div>
+
           {/* Motivo clínico */}
           <div>
             <label className="text-xs font-bold text-slate-700 block mb-1">
@@ -276,6 +283,13 @@ export const AdjustPlanModal: React.FC = () => {
               placeholder="Escribe la razón profesional del cambio calórico o de macronutrientes..."
             />
           </div>
+
+          {errorGuardar && (
+            <div role="alert" className="flex items-start gap-2 p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-700">
+              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{errorGuardar}</span>
+            </div>
+          )}
 
           {/* Botones de acción */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">

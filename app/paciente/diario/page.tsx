@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -18,113 +18,167 @@ import {
   FileText,
 } from 'lucide-react';
 import { PacienteTopBar } from '@/components/paciente/PacienteNavigation';
+import { guardarTiempoRegistro } from '@/lib/sus';
+import { PROTEINA_MAX_REGISTRO_G, nivelAlertaProteina, rangoProteinaG, textoAlertaProteina, textoAvisoDespuesDeGuardar } from '@/lib/motor-reglas';
+import { claveDia } from '@/lib/recordatorio';
+import { cargarPerfil, descartarPendiente, encolar, fetchConTiempo, propietarioLocal, type CuerpoRegistro } from '@/lib/offline';
+
+// Reloj del navegador, fuera del componente: se usa solo en los manejadores de eventos, nunca al pintar.
+const ahoraMs = () => Date.now();
 
 export default function PacienteDiarioPage() {
   const router = useRouter();
 
   const [fecha, setFecha] = useState<string>('');
-  const [pesoAyunas, setPesoAyunas] = useState<string>('78.4');
-  const [sentadillaKg, setSentadillaKg] = useState<string>('100');
-  const [pressBancaKg, setPressBancaKg] = useState<string>('70');
-  const [volumenKg, setVolumenKg] = useState<string>('12500');
-  const [proteinaG, setProteinaG] = useState<string>('140');
+  const [pesoAyunas, setPesoAyunas] = useState<string>('');
+  const [sentadillaKg, setSentadillaKg] = useState<string>('');
+  const [pressBancaKg, setPressBancaKg] = useState<string>('');
+  const [volumenKg, setVolumenKg] = useState<string>('');
+  const [proteinaG, setProteinaG] = useState<string>(''); // opcional
   const [notas, setNotas] = useState<string>('');
 
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  // Texto de cuando el registro quedó solo en este dispositivo (sin internet o servidor no disponible).
+  const [guardadoLocal, setGuardadoLocal] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [alertaProteina, setAlertaProteina] = useState(false);
+  // Aviso educativo que se muestra después de guardar si la proteína quedó alta (igual que en la app).
+  const [avisoPost, setAvisoPost] = useState<string | null>(null);
+  // Momento en que se abrió la pantalla: el tiempo del registro (meta < 30 s) se mide hasta guardar.
+  const inicioRegistro = useRef(0);
 
   // Cargar datos previos si existen
   useEffect(() => {
-    setFecha(new Date().toISOString().split('T')[0]);
+    // Fecha LOCAL (no UTC): después de las 18:00 en México, toISOString() ya daría el día siguiente.
+    setFecha(claveDia(new Date()));
+    inicioRegistro.current = ahoraMs();
 
     async function loadTodayLog() {
-      try {
-        const res = await fetch('/api/paciente/perfil');
-        const json = await res.json();
-        if (json.success && json.data) {
-          if (json.data.peso_actual) {
-            setPesoAyunas(String(json.data.peso_actual));
-          }
-          const ultimoReg = json.data.registros?.[json.data.registros.length - 1];
-          if (ultimoReg) {
-            if (ultimoReg.sentadilla_kg) setSentadillaKg(String(ultimoReg.sentadilla_kg));
-            if (ultimoReg.press_banca_kg) setPressBancaKg(String(ultimoReg.press_banca_kg));
-            if (ultimoReg.volumen_entrenamiento_kg) setVolumenKg(String(ultimoReg.volumen_entrenamiento_kg));
-            if (ultimoReg.proteina_consumida_g) setProteinaG(String(ultimoReg.proteina_consumida_g));
-          }
-        }
-      } catch (e) {
-        console.error('Error cargando datos previos:', e);
+      // Con internet trae lo último; sin internet usa la copia guardada para poder registrar igual.
+      const r = await cargarPerfil();
+      if (r.estado !== 'ok') return;
+      const p = r.perfil;
+      if (p.peso_actual) {
+        setPesoAyunas(String(p.peso_actual));
+      }
+      const ultimoReg = p.registros?.[p.registros.length - 1];
+      if (ultimoReg) {
+        if (ultimoReg.sentadilla_kg) setSentadillaKg(String(ultimoReg.sentadilla_kg));
+        if (ultimoReg.press_banca_kg) setPressBancaKg(String(ultimoReg.press_banca_kg));
+        if (ultimoReg.volumen_entrenamiento_kg) setVolumenKg(String(ultimoReg.volumen_entrenamiento_kg));
       }
     }
     loadTodayLog();
   }, []);
 
-  // Verificar en tiempo real alerta de exceso de proteína (> 2.0 g/kg)
-  useEffect(() => {
-    const pesoNum = Number(pesoAyunas);
-    const protNum = Number(proteinaG);
-    if (pesoNum > 0 && protNum > 0) {
-      const gKg = protNum / pesoNum;
-      setAlertaProteina(gKg > 2.0);
-    } else {
-      setAlertaProteina(false);
-    }
-  }, [pesoAyunas, proteinaG]);
+  // Proteína (opcional) y alerta en dos niveles, calculadas al pintar con las mismas reglas que la app.
+  const pesoNum = Number(pesoAyunas);
+  const protTexto = proteinaG.trim().replace(',', '.');
+  const protNum = protTexto === '' ? null : Number(protTexto);
+  const protValida = protNum !== null && Number.isFinite(protNum) && protNum >= 0 && protNum <= PROTEINA_MAX_REGISTRO_G;
+  const protInvalida = protNum !== null && !protValida;
+  const ratio = protValida && pesoNum > 0 ? (protNum as number) / pesoNum : null;
+  const nivel = ratio !== null ? nivelAlertaProteina(protNum as number, pesoNum) : 'ok';
+  const meta = pesoNum > 0 ? rangoProteinaG(pesoNum) : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess(false);
 
-    const pesoNum = Number(pesoAyunas);
     if (!pesoNum || pesoNum <= 30 || pesoNum >= 250) {
       setError('Por favor ingresa un peso en ayunas válido (ej. 78.4 kg).');
       return;
     }
+    if (protInvalida) {
+      setError(`La proteína debe estar entre 0 y ${PROTEINA_MAX_REGISTRO_G} g, o déjala vacía.`);
+      return;
+    }
 
     setLoading(true);
+    setGuardadoLocal(null);
 
-    try {
-      const res = await fetch('/api/paciente/diario', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fecha,
-          peso_ayunas: pesoNum,
-          sentadilla_kg: Number(sentadillaKg) || 0,
-          press_banca_kg: Number(pressBancaKg) || 0,
-          volumen_entrenamiento_kg: Number(volumenKg) || 0,
-          proteina_consumida_g: Number(proteinaG) || 0,
-          notas,
-        }),
-      });
+    const cuerpo: CuerpoRegistro = {
+      fecha,
+      peso_ayunas: pesoNum,
+      sentadilla_kg: Number(sentadillaKg) || 0,
+      press_banca_kg: Number(pressBancaKg) || 0,
+      volumen_entrenamiento_kg: Number(volumenKg) || 0,
+      proteina_consumida_g: protValida ? (protNum as number) : null,
+      notas,
+    };
 
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        setError(data.error || 'No se pudo guardar el registro.');
-        setLoading(false);
+    // Tras guardar: si la proteína quedó alta se muestra el aviso educativo y se entra al tablero al cerrarlo.
+    const irAlTablero = (ms: number) => {
+      const aviso = ratio !== null ? textoAvisoDespuesDeGuardar(nivel, ratio) : null;
+      if (aviso) {
+        setAvisoPost(aviso);
         return;
       }
-
-      setSuccess(true);
-      setLoading(false);
       setTimeout(() => {
         router.push('/paciente/dashboard');
         router.refresh();
-      }, 1500);
-    } catch (err) {
-      setError('Error al sincronizar con la base de datos.');
+      }, ms);
+    };
+
+    // Guarda el registro en este dispositivo para subirlo después. Devuelve false si no se pudo (no hay datos cargados
+    // de la persona o el navegador no deja guardar).
+    const guardarEnDispositivo = (motivo: string): boolean => {
+      const owner = propietarioLocal();
+      if (!owner || !encolar({ tipo: 'registro', owner, fecha: cuerpo.fecha, cuerpo })) {
+        setError('No se pudo guardar sin internet. Conéctate para registrar tu día.');
+        setLoading(false);
+        return false;
+      }
+      guardarTiempoRegistro((ahoraMs() - inicioRegistro.current) / 1000);
+      inicioRegistro.current = ahoraMs();
+      setGuardadoLocal(motivo);
+      setSuccess(true);
       setLoading(false);
+      irAlTablero(2500);
+      return true;
+    };
+
+    try {
+      const res = await fetchConTiempo('/api/paciente/diario', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cuerpo),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.success) {
+        const dueno = propietarioLocal();
+        if (dueno) descartarPendiente(dueno, 'registro', cuerpo.fecha); // un pendiente viejo de ese día pisaría este
+        guardarTiempoRegistro((ahoraMs() - inicioRegistro.current) / 1000);
+        inicioRegistro.current = ahoraMs();
+        setSuccess(true);
+        setLoading(false);
+        irAlTablero(1500);
+        return;
+      }
+      // El servidor no está disponible o la sesión caducó: el registro no se pierde, se guarda aquí y se sube después.
+      if (res.status >= 500 || res.status === 401 || res.status === 403) {
+        guardarEnDispositivo(
+          res.status >= 500
+            ? 'El servidor no respondió. Tu registro quedó guardado en este dispositivo y se subirá solo en cuanto se pueda.'
+            : 'Tu sesión caducó. Tu registro quedó guardado en este dispositivo; inicia sesión con la misma cuenta y se subirá.'
+        );
+        return;
+      }
+      setError(data.error || 'No se pudo guardar el registro.');
+      setLoading(false);
+    } catch {
+      // Sin conexión (o tiempo agotado). Si el servidor sí lo recibió, al reenviarlo se actualiza el mismo día: no se duplica.
+      guardarEnDispositivo('Sin conexión: tu registro quedó guardado en este dispositivo y se subirá solo cuando vuelva el internet.');
     }
   };
 
-  const pesoNum = Number(pesoAyunas) || 1;
-  const protNum = Number(proteinaG) || 0;
-  const ratioGKg = (protNum / pesoNum).toFixed(2);
+  const irAlTableroYa = () => {
+    router.push('/paciente/dashboard');
+    router.refresh();
+  };
 
   return (
     <div className="w-full min-h-full">
@@ -143,9 +197,12 @@ export default function PacienteDiarioPage() {
           >
             <CheckCircle2 className="w-6 h-6 shrink-0" />
             <div>
-              <span className="font-bold block text-sm">¡Registro guardado con éxito!</span>
+              <span className="font-bold block text-sm">
+                {guardadoLocal ? '¡Registro guardado en tu dispositivo!' : '¡Registro guardado con éxito!'}
+              </span>
               <span className="text-xs opacity-90">
-                Tus datos se sincronizaron con la base de datos y ya los puede revisar tu especialista.
+                {guardadoLocal ??
+                  'Tus datos se sincronizaron con la base de datos y ya los puede revisar tu especialista.'}
               </span>
             </div>
           </div>
@@ -211,7 +268,7 @@ export default function PacienteDiarioPage() {
                         step="0.05"
                         value={pesoAyunas}
                         onChange={(e) => setPesoAyunas(e.target.value)}
-                        placeholder="78.4"
+                        placeholder="Ej. 78.4"
                         required
                         className="w-full text-xl sm:text-2xl font-black text-[var(--text)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-4 py-2 focus:outline-none focus:border-[var(--primary)] pr-12 transition-colors min-h-[44px]"
                       />
@@ -253,7 +310,7 @@ export default function PacienteDiarioPage() {
                         step="0.5"
                         value={sentadillaKg}
                         onChange={(e) => setSentadillaKg(e.target.value)}
-                        placeholder="100"
+                        placeholder="Ej. 100"
                         className="w-full text-lg font-black text-[var(--text)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-[var(--primary)] pr-10 transition-colors min-h-[44px]"
                       />
                       <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-muted)]">
@@ -273,7 +330,7 @@ export default function PacienteDiarioPage() {
                         step="0.5"
                         value={pressBancaKg}
                         onChange={(e) => setPressBancaKg(e.target.value)}
-                        placeholder="70"
+                        placeholder="Ej. 70"
                         className="w-full text-lg font-black text-[var(--text)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 focus:outline-none focus:border-[var(--primary)] pr-10 transition-colors min-h-[44px]"
                       />
                       <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-[var(--text-muted)]">
@@ -293,7 +350,7 @@ export default function PacienteDiarioPage() {
                     type="number"
                     value={volumenKg}
                     onChange={(e) => setVolumenKg(e.target.value)}
-                    placeholder="12500"
+                    placeholder="Ej. 12500"
                     className="w-full bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-sm text-[var(--text)] focus:outline-none focus:border-[var(--primary)] transition-colors min-h-[44px]"
                   />
                   <span className="text-[10px] text-[var(--text-subtle)] block mt-1">
@@ -307,56 +364,67 @@ export default function PacienteDiarioPage() {
                 COLUMNA 2: PROTEÍNA, NOTAS Y ENVÍO (lg:col-span-5)
                 ============================================================== */}
             <div className="lg:col-span-5 space-y-6">
-              {/* Proteína con Alerta Médica > 2.0 g/kg */}
+              {/* Proteína (opcional) con alerta en dos niveles */}
               <div className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Apple className="w-5 h-5 text-[var(--primary)]" />
-                    <h2 className="text-sm sm:text-base font-bold text-[var(--text)]">
-                      3. Ingesta de Proteína
-                    </h2>
+                    <h2 className="text-sm sm:text-base font-bold text-[var(--text)]">3. Ingesta de Proteína</h2>
                   </div>
-                  <span className="text-xs font-bold text-[var(--text-muted)]">
-                    Ratio: {ratioGKg} g/kg
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[var(--surface-raised)] text-[var(--text-muted)] border border-[var(--border)]">
+                    Opcional
                   </span>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5">
-                    Gramos de Proteína Ingeridos Hoy
+                  <label htmlFor="proteina-hoy" className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5">
+                    Proteína ingerida hoy (g)
                   </label>
                   <div className="relative">
                     <input
-                      type="number"
+                      id="proteina-hoy"
+                      type="text"
+                      inputMode="decimal"
                       value={proteinaG}
                       onChange={(e) => setProteinaG(e.target.value)}
-                      placeholder="140"
+                      placeholder="Opcional"
+                      aria-invalid={protInvalida}
+                      aria-describedby="proteina-ayuda"
                       className="w-full text-2xl font-black text-[var(--text)] bg-[var(--surface-raised)] border border-[var(--border)] rounded-xl px-4 py-2.5 focus:outline-none focus:border-[var(--primary)] pr-10 transition-colors min-h-[44px]"
                     />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[var(--text-muted)]">
-                      g
-                    </span>
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-bold text-[var(--text-muted)]">g</span>
                   </div>
+                  <p id="proteina-ayuda" className={`mt-1.5 text-xs ${protInvalida ? 'text-rose-600 font-bold' : 'text-[var(--text-subtle)]'}`}>
+                    {protInvalida
+                      ? `Escribe un valor entre 0 y ${PROTEINA_MAX_REGISTRO_G} g, o déjala vacía.`
+                      : meta
+                        ? `Meta: ${Math.round(meta.min)}–${Math.round(meta.max)} g (1.6 a 1.8 g/kg)${ratio !== null ? ` · Hoy: ${ratio.toFixed(2)} g/kg` : ''}`
+                        : 'Escribe tu peso para ver tu meta de proteína.'}
+                  </p>
                 </div>
 
-                {/* ALERTA CIENTÍFICA SI SUPERA 2.0 g/kg (WCAG AA) */}
-                {alertaProteina ? (
-                  <div
-                    role="alert"
-                    className="p-4 rounded-2xl bg-[var(--danger-surface)] border border-[var(--danger-border)] text-[var(--danger-text)] text-xs space-y-1"
-                  >
+                {nivel === 'rebasa' && ratio !== null && (
+                  <div role="alert" className="p-4 rounded-2xl bg-[var(--danger-surface)] border border-[var(--danger-border)] text-[var(--danger-text)] text-xs space-y-1">
                     <div className="flex items-center gap-2 font-bold">
                       <AlertTriangle className="w-4 h-4 shrink-0" />
-                      <span>Alerta Médica: Ratio de {ratioGKg} g/kg supera el límite</span>
+                      <span>Aviso educativo: llegaste al tope</span>
                     </div>
-                    <p className="leading-relaxed opacity-95">
-                      Ingestas mayores a 2.0 g/kg no generan hipertrofia muscular extra y saturan la tasa de aclaramiento renal. Tu rango prescrito es de 1.6–1.8 g/kg.
-                    </p>
+                    <p className="leading-relaxed">{textoAlertaProteina(nivel, ratio)}</p>
                   </div>
-                ) : (
+                )}
+                {nivel === 'cerca' && ratio !== null && (
+                  <div role="status" className="p-4 rounded-2xl bg-[var(--warning-surface)] border border-[var(--warning-border)] text-[var(--warning-text)] text-xs space-y-1">
+                    <div className="flex items-center gap-2 font-bold">
+                      <AlertTriangle className="w-4 h-4 shrink-0" />
+                      <span>Aviso educativo: arriba de tu rango</span>
+                    </div>
+                    <p className="leading-relaxed">{textoAlertaProteina(nivel, ratio)}</p>
+                  </div>
+                )}
+                {nivel === 'ok' && ratio !== null && (
                   <div className="p-3.5 rounded-2xl bg-[var(--primary-surface)] border border-[var(--primary-border)] text-[var(--primary-text)] text-xs flex items-center gap-2">
                     <Sparkles className="w-4 h-4 shrink-0 text-[var(--primary)]" />
-                    <span>Rango seguro y óptimo para hipertrofia (1.6 – 1.8 g/kg).</span>
+                    <span>{ratio < 1.6 ? 'Vas por debajo del rango de 1.6 a 1.8 g/kg; aún puedes completar tu meta.' : 'Estás dentro del rango de 1.6 a 1.8 g/kg.'}</span>
                   </div>
                 )}
               </div>
@@ -394,6 +462,26 @@ export default function PacienteDiarioPage() {
           </div>
         </form>
       </div>
+
+      {avisoPost && (
+        <div role="dialog" aria-modal="true" aria-labelledby="aviso-edu-titulo" className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[var(--surface)] rounded-3xl p-6 shadow-2xl border border-[var(--border)] space-y-4">
+            <h3 id="aviso-edu-titulo" className="text-base font-bold text-[var(--text)] flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-amber-600" />
+              Aviso educativo
+            </h3>
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed">{avisoPost}</p>
+            <button
+              type="button"
+              autoFocus
+              onClick={irAlTableroYa}
+              className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold cursor-pointer min-h-[44px]"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

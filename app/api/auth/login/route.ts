@@ -1,119 +1,77 @@
 import { NextResponse } from 'next/server';
-import { query, hasDbConnection } from '@/lib/db';
-import { verifyPassword, createSessionToken, COOKIE_NAME } from '@/lib/auth';
+import { crearClienteServidor } from '@/lib/supabase/server';
+import { obtenerRol } from '@/lib/roles';
+import { asegurarUsuario } from '@/lib/perfil';
+
+const falla = (error: string, status: number, codigo?: string) =>
+  NextResponse.json({ success: false, error, ...(codigo ? { codigo } : {}) }, { status });
 
 export async function POST(request: Request) {
   try {
     const { email, password, expectedRole } = await request.json();
+    if (!email || !password) return falla('Correo y contraseña requeridos', 400);
 
-    if (!email || !password) {
-      return NextResponse.json(
-        { success: false, error: 'Correo y contraseña requeridos' },
-        { status: 400 }
-      );
+    const supabase = await crearClienteServidor();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: String(email).trim().toLowerCase(),
+      password: String(password),
+    });
+
+    if (error || !data.user) {
+      if (error?.code === 'email_not_confirmed') {
+        return falla('Confirma tu correo: te enviamos un enlace al registrarte (revisa spam).', 403, 'email_no_confirmado');
+      }
+      return falla('Credenciales inválidas. Verifica tu correo o contraseña.', 401);
     }
 
-    const cleanEmail = email.trim().toLowerCase();
-    let user: any = null;
+    let info = await obtenerRol(supabase, data.user.id);
 
-    if (hasDbConnection()) {
-      try {
-        const rows = await query('SELECT * FROM usuarios WHERE LOWER(email) = $1', [cleanEmail]);
-        if (rows && rows.length > 0) {
-          const candidate = rows[0];
-          const isValid = await verifyPassword(password, candidate.password_hash);
-          if (isValid) {
-            user = candidate;
-          }
-        }
-      } catch (err) {
-        console.error('Error verificando usuario en DB:', err);
+    // Primer inicio de sesión de un paciente registrado desde la web: se crea su fila.
+    if (info.rol === null && info.motivo === 'sin_perfil') {
+      const creado = await asegurarUsuario(supabase, data.user);
+      if (creado) info = await obtenerRol(supabase, data.user.id);
+    }
+
+    // Nutriólogo con el alta a medias (sin datos profesionales o en verificación): conserva la sesión
+    // y va a su pantalla de solicitud o de espera; allí no ve pacientes ni el panel.
+    if (info.rol === null && expectedRole === 'admin') {
+      if (info.motivo === 'nutriologo_pendiente') {
+        return NextResponse.json({ success: true, user: { email: data.user.email, rol: null }, redirectTo: '/admin/verificacion' });
+      }
+      if (info.motivo === 'sin_perfil') {
+        return NextResponse.json({ success: true, user: { email: data.user.email, rol: null }, redirectTo: '/admin/solicitud' });
       }
     }
 
-    // Fallback con credenciales oficiales documentadas
-    if (!user) {
-      if (cleanEmail === 'admin@nutrimasa.com' && (password === 'Password123!' || password === '12345678')) {
-        user = {
-          id: 'usr-admin',
-          email: 'admin@nutrimasa.com',
-          nombre: 'Nutriólogo Admin',
-          rol: 'admin',
-        };
-      } else if (cleanEmail === 'dario@nutrimasa.com' && (password === 'Password123!' || password === '12345678')) {
-        user = {
-          id: 'usr-02',
-          email: 'dario@nutrimasa.com',
-          nombre: 'Darío Fuentes',
-          rol: 'paciente',
-        };
-      } else if (cleanEmail === 'alan@nutrimasa.com' && (password === 'Password123!' || password === '12345678')) {
-        user = {
-          id: 'usr-01',
-          email: 'alan@nutrimasa.com',
-          nombre: 'Alan Salazar',
-          rol: 'paciente',
-        };
-      } else if (cleanEmail === 'carlos@nutrimasa.com' && (password === 'Password123!' || password === '12345678')) {
-        user = {
-          id: 'usr-03',
-          email: 'carlos@nutrimasa.com',
-          nombre: 'Carlos Mendoza',
-          rol: 'paciente',
-        };
-      }
-    }
-
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Credenciales inválidas. Verifica tu correo o contraseña.' },
-        { status: 401 }
+    if (info.rol === null) {
+      await supabase.auth.signOut();
+      return falla(
+        info.motivo === 'nutriologo_pendiente'
+          ? 'Tu cuenta de nutriólogo está pendiente de verificación de cédula.'
+          : data.user.user_metadata?.tipo === 'nutriologo'
+            ? 'Esta cuenta es de nutriólogo. Ingresa en el panel de administrador.'
+            : 'Tu cuenta aún no tiene perfil. Completa el cuestionario de registro.',
+        403
       );
     }
 
-    // Si se especificó un rol esperado, validar coherencia
-    if (expectedRole && user.rol !== expectedRole) {
-      const msg =
+    if (expectedRole && info.rol !== expectedRole) {
+      await supabase.auth.signOut();
+      return falla(
         expectedRole === 'admin'
-          ? 'Esta cuenta pertenece a un paciente. Por favor ingresa en el portal del paciente.'
-          : 'Esta cuenta pertenece al nutriólogo. Por favor ingresa en el panel de administrador.';
-      return NextResponse.json({ success: false, error: msg }, { status: 403 });
+          ? 'Esta cuenta pertenece a un paciente. Ingresa en el portal del paciente.'
+          : 'Esta cuenta pertenece al nutriólogo. Ingresa en el panel de administrador.',
+        403
+      );
     }
 
-    // Generar JWT
-    const token = await createSessionToken({
-      userId: user.id,
-      email: user.email,
-      nombre: user.nombre,
-      rol: user.rol,
-    });
-
-    const response = NextResponse.json({
+    return NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        nombre: user.nombre,
-        rol: user.rol,
-      },
-      redirectTo: user.rol === 'admin' ? '/admin' : '/paciente/dashboard',
+      user: { id: info.id, email: data.user.email, nombre: info.nombre, rol: info.rol },
+      redirectTo: info.rol === 'admin' ? '/admin' : '/paciente/dashboard',
     });
-
-    // Establecer Cookie HTTP-Only Segura
-    response.cookies.set(COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60, // 7 días
-    });
-
-    return response;
-  } catch (error: any) {
-    console.error('Error en login:', error);
-    return NextResponse.json(
-      { success: false, error: 'Error procesando la solicitud de inicio de sesión' },
-      { status: 500 }
-    );
+  } catch (e) {
+    console.error('login:', e);
+    return falla('Error procesando el inicio de sesión', 500);
   }
 }

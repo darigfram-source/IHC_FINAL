@@ -2,20 +2,24 @@
 
 import React, { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Dumbbell, Lock, Mail, ArrowRight, UserCheck, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Dumbbell, Lock, Mail, ArrowRight, ArrowLeft, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
+import { ReenviarConfirmacion } from '@/components/ReenviarConfirmacion';
 
 function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState('admin@nutrimasa.com');
-  const [password, setPassword] = useState('Password123!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [ver, setVer] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [cargando, setCargando] = useState(false);
+  const [pideReenvio, setPideReenvio] = useState(false); // cuenta sin confirmar: se ofrece reenviar el correo
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
+    setPideReenvio(false);
     setCargando(true);
 
     try {
@@ -28,11 +32,14 @@ function AdminLoginForm() {
       const data = await res.json();
       if (!res.ok || !data.success) {
         setErrorMsg(data.error || 'Credenciales inválidas');
+        setPideReenvio(data.codigo === 'email_no_confirmado');
         setCargando(false);
         return;
       }
 
-      const dest = searchParams.get('from') || '/admin';
+      // Alta a medias (solicitud o verificación) manda a su pantalla; el panel, a donde iba.
+      const alta = typeof data.redirectTo === 'string' && data.redirectTo !== '/admin' && data.redirectTo.startsWith('/admin/') ? data.redirectTo : null;
+      const dest = alta ?? (searchParams.get('from') || '/admin');
       router.push(dest);
       router.refresh();
     } catch {
@@ -41,25 +48,6 @@ function AdminLoginForm() {
     }
   };
 
-  const handleQuickLogin = async () => {
-    setEmail('admin@nutrimasa.com');
-    setPassword('Password123!');
-    setCargando(true);
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'admin@nutrimasa.com', password: 'Password123!', expectedRole: 'admin' }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        router.push('/admin');
-        router.refresh();
-      }
-    } finally {
-      setCargando(false);
-    }
-  };
 
   return (
     <div className="p-7">
@@ -76,7 +64,7 @@ function AdminLoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:ring-2 focus:ring-emerald-500 text-xs"
-              placeholder="admin@nutrimasa.com"
+              placeholder="correo@institucion.mx"
             />
           </div>
         </div>
@@ -86,14 +74,28 @@ function AdminLoginForm() {
           <div className="relative">
             <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              type="password"
+              type={ver ? 'text' : 'password'}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:ring-2 focus:ring-emerald-500 text-xs"
+              className="w-full pl-9 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:ring-2 focus:ring-emerald-500 text-xs"
               placeholder="••••••••"
             />
+            <button
+              type="button"
+              onClick={() => setVer((v) => !v)}
+              aria-label={ver ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-emerald-700 transition-colors"
+            >
+              {ver ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
+        </div>
+
+        <div className="text-right -mt-1">
+          <a href="/recuperar" className="text-xs text-emerald-700 hover:text-emerald-800 underline underline-offset-2">
+            ¿Olvidaste tu contraseña?
+          </a>
         </div>
 
         {errorMsg && (
@@ -101,6 +103,8 @@ function AdminLoginForm() {
             {errorMsg}
           </div>
         )}
+
+        {pideReenvio && <ReenviarConfirmacion correo={email} tema="claro" />}
 
         <button
           type="submit"
@@ -111,20 +115,20 @@ function AdminLoginForm() {
           <ArrowRight className="w-4 h-4" />
         </button>
 
-        {/* Acceso Rápido Demo */}
-        <button
-          type="button"
-          onClick={handleQuickLogin}
-          disabled={cargando}
-          className="w-full py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-semibold rounded-xl transition-all flex items-center justify-center gap-2 text-xs"
-        >
-          <UserCheck className="w-4 h-4 text-emerald-600" />
-          <span>Acceso Rápido Demo (Nutriólogo Admin)</span>
-        </button>
       </form>
 
-      {/* Enlace a Portal de Paciente */}
+      {/* Alta de nutriólogo */}
       <div className="mt-6 pt-4 border-t border-slate-100 text-center">
+        <p className="text-xs text-slate-500">
+          ¿Eres nutriólogo y aún no tienes cuenta?{' '}
+          <Link href="/admin/registro" className="text-emerald-700 font-bold hover:underline">
+            Solicita tu alta
+          </Link>
+        </p>
+      </div>
+
+      {/* Enlace a Portal de Paciente */}
+      <div className="mt-4 pt-4 border-t border-slate-100 text-center">
         <p className="text-xs text-slate-500">
           ¿Eres paciente?{' '}
           <Link href="/paciente/login" className="text-emerald-700 font-bold hover:underline">

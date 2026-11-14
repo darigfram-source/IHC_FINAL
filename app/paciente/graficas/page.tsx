@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import {
   TrendingUp,
   Scale,
@@ -11,8 +12,14 @@ import {
   Info,
   CheckCircle2,
   AlertTriangle,
+  Flag,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { PacienteTopBar } from '@/components/paciente/PacienteNavigation';
+import { cargarPerfil, EVENTO_SINCRONIZADO } from '@/lib/offline';
+import { nivelAlertaProteina, rangoProteinaG } from '@/lib/motor-reglas';
+import { avanceHaciaMeta, n1, textoFalta } from '@/lib/metas';
 
 interface Registro {
   id: string;
@@ -21,45 +28,53 @@ interface Registro {
   sentadilla_kg: number;
   press_banca_kg: number;
   volumen_entrenamiento_kg: number;
-  proteina_consumida_g?: number;
+  proteina_consumida_g?: number | null;
 }
 
 export default function PacienteGraficasPage() {
   const [tab, setTab] = useState<'peso' | 'cargas' | 'volumen'>('peso');
   const [registros, setRegistros] = useState<Registro[]>([]);
-  const [pesoActual, setPesoActual] = useState<number>(78.4);
-  const [pesoMeta, setPesoMeta] = useState<number>(82.0);
+  const [pesoActual, setPesoActual] = useState<number | null>(null);
+  const [pesoMeta, setPesoMeta] = useState<number | null>(null);
+  const [superavit, setSuperavit] = useState<number | null>(null);
   const [estadoHipertrofia, setEstadoHipertrofia] = useState<string>('En progreso');
+  const [verMas, setVerMas] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [errorCarga, setErrorCarga] = useState(false);
 
   useEffect(() => {
     async function fetchHistory() {
       try {
-        const res = await fetch('/api/paciente/perfil');
-        const json = await res.json();
-        if (json.success && json.data) {
-          if (json.data.registros && json.data.registros.length > 0) {
-            setRegistros(json.data.registros);
-          } else {
-            // Datos iniciales de demostración si aún no hay registros
-            setRegistros([
-              { id: '1', fecha: '2026-10-10', peso_ayunas: 77.2, sentadilla_kg: 95, press_banca_kg: 65, volumen_entrenamiento_kg: 11000 },
-              { id: '2', fecha: '2026-10-17', peso_ayunas: 77.6, sentadilla_kg: 97.5, press_banca_kg: 67.5, volumen_entrenamiento_kg: 11600 },
-              { id: '3', fecha: '2026-10-24', peso_ayunas: 78.0, sentadilla_kg: 100, press_banca_kg: 70, volumen_entrenamiento_kg: 12100 },
-              { id: '4', fecha: '2026-10-31', peso_ayunas: 78.4, sentadilla_kg: 102.5, press_banca_kg: 72.5, volumen_entrenamiento_kg: 12500 },
-            ]);
-          }
-          if (json.data.peso_actual) setPesoActual(Number(json.data.peso_actual));
-          if (json.data.peso_objetivo) setPesoMeta(Number(json.data.peso_objetivo));
-          if (json.data.estado_hipertrofia) setEstadoHipertrofia(json.data.estado_hipertrofia);
+        // Con internet trae lo último; sin internet usa la copia guardada en el dispositivo.
+        const r = await cargarPerfil();
+        if (r.estado === 'ok') {
+          const p = r.perfil;
+          const regs = (Array.isArray(p.registros) ? p.registros : []) as unknown as Registro[];
+          // Sin registros no se muestra nada inventado: la pantalla explica cómo empezar.
+          setRegistros(regs);
+          const pesos = regs.map((x) => Number(x.peso_ayunas)).filter((v) => Number.isFinite(v) && v > 0);
+          // Igual que la app: el peso de hoy es el del último registro; si no hay, el del alta.
+          const actual = pesos.length ? pesos[pesos.length - 1] : Number(p.peso_actual);
+          setPesoActual(Number.isFinite(actual) && actual > 0 ? actual : null);
+          const meta = Number(p.peso_objetivo);
+          setPesoMeta(Number.isFinite(meta) && meta > 0 ? meta : null);
+          const sup = Number(p.superavit_kcal);
+          setSuperavit(Number.isFinite(sup) && sup > 0 ? sup : null);
+          if (typeof p.estado === 'string' && p.estado) setEstadoHipertrofia(p.estado);
+          setErrorCarga(false);
+        } else {
+          setErrorCarga(true);
         }
       } catch (e) {
         console.error('Error cargando gráficas:', e);
+        setErrorCarga(true);
       } finally {
         setLoading(false);
       }
     }
     fetchHistory();
+    window.addEventListener(EVENTO_SINCRONIZADO, fetchHistory);
+    return () => window.removeEventListener(EVENTO_SINCRONIZADO, fetchHistory);
   }, []);
 
   // Calcular puntos para SVG (ViewBox 600x260 adaptable)
@@ -78,11 +93,32 @@ export default function PacienteGraficasPage() {
   const maxLoad = Math.max(...(squats.length ? squats : [120])) + 5;
   const minLoad = Math.min(...(benches.length ? benches : [50])) - 5;
 
-  const volumes = dataList.map((r) => Number(r.volumen_entrenamiento_kg || 10000));
+  const volumes = dataList.map((r) => Number(r.volumen_entrenamiento_kg || 0));
   const minVol = Math.min(...(volumes.length ? volumes : [9000])) - 500;
   const maxVol = Math.max(...(volumes.length ? volumes : [15000])) + 500;
 
+  const hayRegistros = registros.length > 0;
+  const ultimo = hayRegistros ? registros[registros.length - 1] : null;
+  const pesoPlan = pesoActual ?? 0;
+  const metaProteina = pesoPlan > 0 ? rangoProteinaG(pesoPlan) : null;
+  const avance = pesoActual !== null && pesoMeta !== null
+    ? avanceHaciaMeta({
+        pesoInicial: (() => {
+          const p0 = registros.map((x) => Number(x.peso_ayunas)).filter((v) => Number.isFinite(v) && v > 0);
+          return p0.length ? p0[0] : null;
+        })(),
+        pesoActual,
+        meta: pesoMeta,
+      })
+    : null;
+  // Alerta personal: la última proteína registrada, solo si quedó arriba del rango.
+  const protUltima = ultimo && ultimo.proteina_consumida_g != null ? Number(ultimo.proteina_consumida_g) : null;
+  const pesoUltimo = ultimo ? Number(ultimo.peso_ayunas) : 0;
+  const nivelUltima = protUltima !== null && protUltima > 0 && pesoUltimo > 0 ? nivelAlertaProteina(protUltima, pesoUltimo) : 'ok';
+  const gkgUltima = protUltima !== null && pesoUltimo > 0 ? protUltima / pesoUltimo : null;
+
   const getPoints = (values: number[], minVal: number, maxVal: number) => {
+    if (values.length === 0) return '';
     if (values.length <= 1) return `${padX},${svgHeight / 2} ${svgWidth - padX},${svgHeight / 2}`;
     const range = maxVal - minVal || 1;
     return values
@@ -167,6 +203,26 @@ export default function PacienteGraficasPage() {
           </div>
         </div>
 
+        {errorCarga && !loading && (
+          <p role="alert" className="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 text-xs font-bold text-rose-700 dark:text-rose-400">
+            No se pudieron cargar tus datos. Recarga la página.
+          </p>
+        )}
+
+        {!loading && !errorCarga && !hayRegistros && (
+          <div className="p-5 rounded-3xl bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-[var(--text-muted)]">
+              Aún no tienes registros. Tus gráficas aparecerán aquí en cuanto guardes tu primer registro diario.
+            </p>
+            <Link
+              href="/paciente/diario"
+              className="inline-flex items-center min-h-[44px] px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold"
+            >
+              Hacer mi primer registro
+            </Link>
+          </div>
+        )}
+
         {/* ====================================================================
             LAYOUT GRID RESPONSIVO: GRÁFICA PRINCIPAL + TABLA DE HISTORIAL
             ==================================================================== */}
@@ -187,9 +243,9 @@ export default function PacienteGraficasPage() {
                     {tab === 'volumen' && 'Volumen Semanal de Carga (kg totales)'}
                   </span>
                   <div className="text-2xl sm:text-3xl font-black text-[var(--text)] mt-1">
-                    {tab === 'peso' && `${pesoActual} kg`}
-                    {tab === 'cargas' && `${squats[squats.length - 1] || 100} kg / ${benches[benches.length - 1] || 70} kg`}
-                    {tab === 'volumen' && `${volumes[volumes.length - 1] || 12500} kg`}
+                    {tab === 'peso' && (pesoActual !== null ? `${n1(pesoActual)} kg` : '—')}
+                    {tab === 'cargas' && (hayRegistros ? `${squats[squats.length - 1] || '—'} kg / ${benches[benches.length - 1] || '—'} kg` : '—')}
+                    {tab === 'volumen' && (hayRegistros ? `${volumes[volumes.length - 1] || '—'} kg` : '—')}
                   </div>
                 </div>
 
@@ -306,9 +362,9 @@ export default function PacienteGraficasPage() {
 
                 {/* Fechas en el eje horizontal */}
                 <div className="flex justify-between text-xs text-[var(--text-subtle)] px-4 mt-3">
-                  <span>{dataList[0]?.fecha || 'Semana 1'}</span>
-                  <span>{dataList[Math.floor(dataList.length / 2)]?.fecha || 'Semana 2'}</span>
-                  <span>{dataList[dataList.length - 1]?.fecha || 'Actual'}</span>
+                  <span>{dataList[0]?.fecha?.slice(0, 10) ?? ''}</span>
+                  <span>{dataList.length > 2 ? dataList[Math.floor(dataList.length / 2)]?.fecha?.slice(0, 10) : ''}</span>
+                  <span>{dataList.length > 1 ? dataList[dataList.length - 1]?.fecha?.slice(0, 10) : ''}</span>
                 </div>
               </div>
 
@@ -320,6 +376,89 @@ export default function PacienteGraficasPage() {
                 </p>
               </div>
             </article>
+
+            {/* Meta y plan de hoy */}
+            {pesoActual !== null && (
+              <article aria-label="Meta y plan de hoy" className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-4">
+                {pesoMeta !== null && (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Flag className="w-4 h-4 text-[var(--primary)]" />
+                      <h3 className="text-sm font-bold text-[var(--text)]">Meta: {n1(pesoMeta)} kg</h3>
+                    </div>
+                    <p className="text-xs text-[var(--text-muted)]">{textoFalta(pesoActual, pesoMeta)}</p>
+                    {avance && (
+                      <div
+                        role="progressbar"
+                        aria-valuenow={avance.pct}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-label="Avance hacia tu meta de peso"
+                        className="w-full h-2.5 rounded-full bg-[var(--surface-active)] overflow-hidden"
+                      >
+                        <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" style={{ width: `${avance.pct}%` }} />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="p-4 rounded-2xl bg-[var(--primary-surface)] border border-[var(--primary-border)] text-[var(--primary-text)] text-xs space-y-1.5">
+                  <p className="font-black">Tu plan de hoy:</p>
+                  {metaProteina && (
+                    <p>
+                      <strong>Proteína: </strong>1.6 a 1.8 g/kg al día ({Math.round(metaProteina.min)} a {Math.round(metaProteina.max)} g)
+                    </p>
+                  )}
+                  {superavit !== null && (
+                    <p>
+                      <strong>Superávit: </strong>+{superavit} kcal sobre tu dieta habitual
+                    </p>
+                  )}
+                </div>
+              </article>
+            )}
+
+            {/* Alerta personal de proteína (dos niveles) */}
+            {nivelUltima !== 'ok' && gkgUltima !== null && (
+              <div
+                role="status"
+                className={`p-4 rounded-2xl border text-xs flex items-start gap-3 ${
+                  nivelUltima === 'rebasa'
+                    ? 'bg-[var(--danger-surface)] border-[var(--danger-border)] text-[var(--danger-text)]'
+                    : 'bg-[var(--warning-surface)] border-[var(--warning-border)] text-[var(--warning-text)]'
+                }`}
+              >
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <p className="font-semibold leading-relaxed">
+                  Tu última proteína registrada fue {gkgUltima.toFixed(2)} g/kg, arriba del rango de 1.6 a 1.8 g/kg.{' '}
+                  {nivelUltima === 'rebasa' ? 'Llegó al tope de 2.0 g/kg.' : 'Conviene no pasar de 2.0 g/kg.'}
+                </p>
+              </div>
+            )}
+
+            {/* Aviso educativo */}
+            <aside aria-label="Aviso educativo" className="p-4 sm:p-5 rounded-2xl bg-[var(--warning-surface)] border border-[var(--warning-border)] text-[var(--warning-text)] text-xs space-y-2">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                <p className="font-bold leading-relaxed">
+                  Aviso educativo: Pasar de 2.0 g/kg de proteína al día no aporta más músculo y, de forma sostenida, puede exigir más a los riñones.
+                </p>
+              </div>
+              {verMas && (
+                <p className="pt-2 border-t border-[var(--warning-border)] leading-relaxed">
+                  Estudios científicos (Morton et al., 2018; Jäger et al., 2017) concluyen que la síntesis de proteína muscular se satura en 1.6–1.8 g/kg. Ingestas superiores a 2.0 g/kg elevan la presión intraglomerular renal sin brindar beneficios hipertróficos comprobados.
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => setVerMas((v) => !v)}
+                aria-expanded={verMas}
+                className="inline-flex items-center gap-1 min-h-[44px] font-bold underline underline-offset-2 cursor-pointer"
+              >
+                {verMas ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                {verMas ? 'Ver menos' : 'Ver más'}
+              </button>
+            </aside>
           </div>
 
           {/* ================================================================
@@ -360,7 +499,7 @@ export default function PacienteGraficasPage() {
                         {reg.peso_ayunas} kg
                       </span>
                       <span className="block text-[10px] text-[var(--primary)] font-bold">
-                        {reg.proteina_consumida_g ? `${reg.proteina_consumida_g}g prot.` : 'Completo'}
+                        {reg.proteina_consumida_g ? `${reg.proteina_consumida_g}g prot.` : 'Sin proteína'}
                       </span>
                     </div>
                   </div>

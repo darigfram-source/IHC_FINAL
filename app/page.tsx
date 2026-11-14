@@ -154,31 +154,6 @@ export default function WelcomePortalPage() {
           </div>
         </div>
 
-        {/* Ficha Informativa de Cuentas Demo de Prueba */}
-        <div className="mt-10 p-4 bg-black/40 border border-emerald-900/60 rounded-2xl max-w-2xl w-full text-xs text-left">
-          <div className="flex items-center gap-2 text-emerald-400 font-bold mb-2">
-            <ShieldCheck className="w-4 h-4" />
-            <span>Credenciales de prueba disponibles (Contraseña para todas: <code>Password123!</code>):</span>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-300">
-            <div className="bg-emerald-950/40 p-2 rounded-lg border border-emerald-800/30">
-              <span className="text-emerald-400 font-semibold block">👨‍⚕️ Nutriólogo Admin:</span>
-              <span><code>admin@nutrimasa.com</code></span>
-            </div>
-            <div className="bg-emerald-950/40 p-2 rounded-lg border border-emerald-800/30">
-              <span className="text-emerald-400 font-semibold block">🏋️‍♂️ Paciente 1 (Darío Fuentes):</span>
-              <span><code>dario@nutrimasa.com</code></span>
-            </div>
-            <div className="bg-emerald-950/40 p-2 rounded-lg border border-emerald-800/30">
-              <span className="text-emerald-400 font-semibold block">🏋️‍♂️ Paciente 2 (Alan Salazar):</span>
-              <span><code>alan@nutrimasa.com</code></span>
-            </div>
-            <div className="bg-emerald-950/40 p-2 rounded-lg border border-emerald-800/30">
-              <span className="text-emerald-400 font-semibold block">🏋️‍♂️ Paciente 3 (Carlos Mendoza):</span>
-              <span><code>carlos@nutrimasa.com</code></span>
-            </div>
-          </div>
-        </div>
       </main>
 
       {/* Footer */}

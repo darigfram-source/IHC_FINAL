@@ -15,6 +15,7 @@ import {
   Sliders,
   MessageSquare,
   FileSpreadsheet,
+  MinusCircle,
 } from 'lucide-react';
 
 export const UserTable: React.FC = () => {
@@ -66,6 +67,13 @@ export const UserTable: React.FC = () => {
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-800 border border-rose-300">
             <AlertTriangle className="w-3 h-3 text-rose-600" />
             Peso sube, cargas no
+          </span>
+        );
+      case 'Sin datos':
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-300">
+            <MinusCircle className="w-3 h-3 text-slate-500" />
+            Sin datos
           </span>
         );
     }
@@ -155,7 +163,9 @@ export const UserTable: React.FC = () => {
             {filteredUsers.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
-                  No se encontraron usuarios asignados con el filtro seleccionado.
+                  {usuarios.length === 0
+                    ? 'Todavía no tienes pacientes asignados. Aparecerán aquí cuando un usuario termine su registro.'
+                    : 'No se encontraron usuarios asignados con el filtro seleccionado.'}
                 </td>
               </tr>
             ) : (

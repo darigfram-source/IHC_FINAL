@@ -230,3 +230,146 @@ body {
     padding: 0 !important;
   }
 }
+
+/* Reporte del paciente (/paciente/reportes): se imprime solo #reporte-impreso, para "Guardar como PDF". */
+#reporte-impreso {
+  display: none;
+}
+@media print {
+  body.imprimiendo-reporte > *:not(#reporte-impreso) {
+    display: none !important;
+  }
+  body.imprimiendo-reporte #reporte-impreso {
+    display: block !important;
+  }
+}
+
+/* ============================================================================
+   MODO OSCURO DEL PANEL DEL NUTRIÓLOGO (.panel-nutri)
+   El panel usa clases fijas de Tailwind (slate, emerald, rose...). Aquí se
+   remapean a los tokens oscuros, solo dentro de .panel-nutri, para no tocar
+   cientos de clases. La barra lateral ya es oscura y no se modifica.
+   ============================================================================ */
+.dark .panel-nutri { color-scheme: dark; }
+.dark .panel-nutri.bg-slate-100 { background-color: var(--bg); }
+
+/* Superficies */
+.dark .panel-nutri .bg-white { background-color: var(--surface); }
+.dark .panel-nutri .bg-slate-50,
+.dark .panel-nutri [class*="bg-slate-50/"] { background-color: var(--surface-raised); }
+.dark .panel-nutri .bg-slate-100,
+.dark .panel-nutri [class*="bg-slate-100/"] { background-color: var(--surface-hover); }
+.dark .panel-nutri .bg-slate-200,
+.dark .panel-nutri [class*="bg-slate-200/"] { background-color: var(--surface-active); }
+.dark .panel-nutri .hover\:bg-slate-50:hover,
+.dark .panel-nutri .hover\:bg-slate-100:hover,
+.dark .panel-nutri [class*="hover:bg-slate-100/"]:hover { background-color: var(--surface-hover); }
+.dark .panel-nutri .hover\:bg-slate-200:hover { background-color: var(--surface-active); }
+.dark .panel-nutri .bg-slate-900 { background-color: var(--surface-active); }
+.dark .panel-nutri .hover\:bg-slate-900:hover { background-color: var(--border-strong); }
+
+/* Bordes y separadores */
+.dark .panel-nutri .border-slate-100,
+.dark .panel-nutri .divide-slate-100 > :not(:last-child) { border-color: var(--border-subtle); }
+.dark .panel-nutri .border-slate-200 { border-color: var(--border); }
+.dark .panel-nutri .border-slate-300,
+.dark .panel-nutri .border-slate-400 { border-color: var(--border-strong); }
+
+/* Texto neutro */
+.dark .panel-nutri .text-slate-900,
+.dark .panel-nutri .text-slate-800,
+.dark .panel-nutri .text-slate-700,
+.dark .panel-nutri .hover\:text-slate-900:hover,
+.dark .panel-nutri .hover\:text-slate-800:hover,
+.dark .panel-nutri .hover\:text-slate-700:hover { color: var(--text); }
+.dark .panel-nutri .text-slate-600 { color: var(--text-muted); }
+.dark .panel-nutri .text-slate-500,
+.dark .panel-nutri .text-slate-400 { color: #8a9ab1; }
+.dark .panel-nutri .text-slate-300 { color: #53627a; }
+.dark .panel-nutri input::placeholder,
+.dark .panel-nutri textarea::placeholder { color: #64748b; }
+
+/* Verde (primario): fondos suaves, bordes y texto */
+.dark .panel-nutri .bg-emerald-50,
+.dark .panel-nutri .bg-emerald-100,
+.dark .panel-nutri .bg-teal-50,
+.dark .panel-nutri [class*="bg-emerald-50/"],
+.dark .panel-nutri [class*="bg-teal-50/"],
+.dark .panel-nutri [class*="bg-emerald-100/"],
+.dark .panel-nutri .hover\:bg-emerald-50:hover,
+.dark .panel-nutri .hover\:bg-emerald-100:hover,
+.dark .panel-nutri [class*="hover:bg-emerald-100/"]:hover,
+.dark .panel-nutri .group:hover .group-hover\:bg-emerald-100 { background-color: var(--primary-surface); }
+.dark .panel-nutri .border-emerald-200,
+.dark .panel-nutri .border-emerald-300,
+.dark .panel-nutri [class*="border-emerald-200/"],
+.dark .panel-nutri .border-teal-200 { border-color: var(--primary-border); }
+.dark .panel-nutri .text-emerald-600,
+.dark .panel-nutri .text-emerald-700,
+.dark .panel-nutri .text-emerald-800,
+.dark .panel-nutri .text-emerald-900,
+.dark .panel-nutri .text-emerald-950,
+.dark .panel-nutri .text-teal-600,
+.dark .panel-nutri .text-teal-700,
+.dark .panel-nutri .text-teal-800,
+.dark .panel-nutri .text-teal-900,
+.dark .panel-nutri .hover\:text-emerald-700:hover,
+.dark .panel-nutri .hover\:text-emerald-800:hover,
+.dark .panel-nutri .hover\:text-emerald-900:hover,
+.dark .panel-nutri .group:hover .group-hover\:text-emerald-800,
+.dark .panel-nutri .group:hover .group-hover\:text-emerald-900 { color: var(--primary-text); }
+
+/* Rojo / rosa (peligro) */
+.dark .panel-nutri .bg-rose-50,
+.dark .panel-nutri .bg-rose-100,
+.dark .panel-nutri .hover\:bg-rose-50:hover { background-color: var(--danger-surface); }
+.dark .panel-nutri .border-rose-200,
+.dark .panel-nutri .border-rose-300 { border-color: var(--danger-border); }
+.dark .panel-nutri .text-rose-600,
+.dark .panel-nutri .text-rose-700,
+.dark .panel-nutri .text-rose-800,
+.dark .panel-nutri .text-rose-900,
+.dark .panel-nutri .hover\:text-rose-800:hover { color: var(--danger-text); }
+
+/* Ámbar (avisos) */
+.dark .panel-nutri .bg-amber-50,
+.dark .panel-nutri .bg-amber-100,
+.dark .panel-nutri [class*="bg-amber-50/"] { background-color: var(--warning-surface); }
+.dark .panel-nutri .border-amber-200,
+.dark .panel-nutri .border-amber-300,
+.dark .panel-nutri [class*="border-amber-200/"] { border-color: var(--warning-border); }
+.dark .panel-nutri .text-amber-600,
+.dark .panel-nutri .text-amber-700,
+.dark .panel-nutri .text-amber-800,
+.dark .panel-nutri .text-amber-900 { color: var(--warning-text); }
+
+/* Violeta / púrpura / índigo */
+.dark .panel-nutri .bg-violet-50,
+.dark .panel-nutri .bg-violet-200,
+.dark .panel-nutri .bg-purple-50,
+.dark .panel-nutri .bg-indigo-50,
+.dark .panel-nutri [class*="bg-violet-50/"],
+.dark .panel-nutri [class*="bg-indigo-50/"],
+.dark .panel-nutri .hover\:bg-violet-100:hover { background-color: var(--purple-surface); }
+.dark .panel-nutri .border-violet-200,
+.dark .panel-nutri .border-indigo-200 { border-color: var(--purple-border); }
+.dark .panel-nutri .text-violet-600,
+.dark .panel-nutri .text-violet-700,
+.dark .panel-nutri .text-violet-800,
+.dark .panel-nutri .text-purple-700,
+.dark .panel-nutri .text-indigo-700,
+.dark .panel-nutri .text-indigo-800,
+.dark .panel-nutri .text-indigo-900 { color: var(--purple-text); }
+
+/* Azul */
+.dark .panel-nutri .bg-blue-50,
+.dark .panel-nutri [class*="bg-blue-50/"],
+.dark .panel-nutri .hover\:bg-blue-50:hover { background-color: var(--cyan-surface); }
+.dark .panel-nutri .border-blue-200 { border-color: var(--cyan-border); }
+.dark .panel-nutri .text-blue-700,
+.dark .panel-nutri .text-blue-800,
+.dark .panel-nutri .text-blue-900 { color: var(--cyan-text); }
+
+/* La barra lateral y los encabezados oscuros conservan su color */
+.dark .panel-nutri aside .text-white,
+.dark .panel-nutri .text-white { color: #ffffff; }

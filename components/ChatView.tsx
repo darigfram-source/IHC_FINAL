@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNutriMasa } from '@/lib/NutriMasaContext';
+import { AccionesMensaje, EditorMensaje, useAhora } from '@/components/AccionesMensaje';
+import { SugerenciasRespuesta } from '@/components/SugerenciasRespuesta';
 import {
   Send,
   AlertTriangle,
@@ -23,10 +25,35 @@ export const ChatView: React.FC = () => {
     selectedUsuario,
     mensajes,
     enviarMensaje,
+    editarMensaje,
+    eliminarMensaje,
     setIsAdjustModalOpen,
+    modoReal,
   } = useNutriMasa();
 
   const [inputTexto, setInputTexto] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const ahoraMs = useAhora();
+  const [editandoId, setEditandoId] = useState<string | null>(null);
+  const [guardandoEdicion, setGuardandoEdicion] = useState(false);
+  const [errorMensaje, setErrorMensaje] = useState<string | null>(null);
+
+  const guardarEdicion = async (id: string, texto: string) => {
+    setGuardandoEdicion(true);
+    const err = await editarMensaje(id, texto);
+    setGuardandoEdicion(false);
+    if (err) setErrorMensaje(err);
+    else {
+      setErrorMensaje(null);
+      setEditandoId(null);
+    }
+  };
+
+  const quitarMensaje = async (id: string) => {
+    if (!window.confirm('¿Eliminar este mensaje? El paciente ya no lo verá.')) return;
+    const err = await eliminarMensaje(id);
+    setErrorMensaje(err);
+  };
 
   // Mensajes correspondientes al usuario seleccionado
   const userMessages = mensajes.filter((m) => m.usuario_id === selectedUsuarioId);
@@ -38,9 +65,10 @@ export const ChatView: React.FC = () => {
     setInputTexto('');
   };
 
-  // Plantillas clínicas rápidas basadas en evidencia (Urdampilleta 2012, Morton 2018)
-  const enviarPlantilla = (texto: string, tipo: 'sugerencia_suplementacion' | 'ajuste_plan' | 'texto') => {
-    enviarMensaje(texto, tipo, selectedUsuarioId);
+  // Plantillas: se cargan en la caja de texto para que el nutriólogo las edite; nunca se envían solas
+  const usarPlantilla = (texto: string) => {
+    setInputTexto(texto);
+    inputRef.current?.focus();
   };
 
   return (
@@ -53,6 +81,11 @@ export const ChatView: React.FC = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+          {usuarios.length === 0 && (
+            <p className="p-4 text-xs text-center text-slate-400">
+              Todavía no tienes pacientes asignados. Aparecerán aquí cuando un usuario termine su registro.
+            </p>
+          )}
           {usuarios.map((u) => {
             const isSelected = u.id === selectedUsuarioId;
             const ultMensaje = mensajes
@@ -91,6 +124,8 @@ export const ChatView: React.FC = () => {
                           ? 'bg-emerald-100 text-emerald-800'
                           : u.estado === 'Estancado'
                           ? 'bg-amber-100 text-amber-800'
+                          : u.estado === 'Sin datos'
+                          ? 'bg-slate-100 text-slate-600'
                           : 'bg-rose-100 text-rose-800'
                       }`}
                     >
@@ -174,12 +209,34 @@ export const ChatView: React.FC = () => {
                       </span>
                     )}
 
-                    <p className="leading-relaxed whitespace-pre-wrap">{msg.contenido}</p>
+                    {editandoId === msg.id ? (
+                      <EditorMensaje
+                        inicial={msg.contenido}
+                        guardando={guardandoEdicion}
+                        onCancelar={() => setEditandoId(null)}
+                        onGuardar={(t) => guardarEdicion(msg.id, t)}
+                      />
+                    ) : (
+                      <p className="leading-relaxed whitespace-pre-wrap">{msg.contenido}</p>
+                    )}
                     <div
-                      className={`text-[9px] mt-1.5 flex items-center justify-end gap-1 ${
+                      className={`text-[9px] mt-1.5 flex flex-wrap items-center justify-end gap-x-2 gap-y-1 ${
                         esNutriologo ? 'text-emerald-200/80' : 'text-slate-400'
                       }`}
                     >
+                      {esNutriologo && editandoId !== msg.id && !msg.id.startsWith('tmp-') && (
+                        <AccionesMensaje
+                          creadoIso={msg.hora_iso}
+                          ahoraMs={ahoraMs}
+                          clase="text-emerald-100"
+                          onEditar={() => {
+                            setErrorMensaje(null);
+                            setEditandoId(msg.id);
+                          }}
+                          onEliminar={() => quitarMensaje(msg.id)}
+                        />
+                      )}
+                      {msg.editado_en && <span className="italic">editado</span>}
                       <span>{msg.creado_en}</span>
                       {esNutriologo && <CheckCheck className="w-3 h-3 text-emerald-300" />}
                     </div>
@@ -190,6 +247,24 @@ export const ChatView: React.FC = () => {
           )}
         </div>
 
+        {errorMensaje && (
+          <p role="alert" className="px-4 py-2 text-xs font-bold text-rose-700 bg-rose-50 border-t border-rose-200">
+            {errorMensaje}
+          </p>
+        )}
+
+        {/* Borradores de respuesta (IA o reglas): van a la caja de texto, nunca se envían solos */}
+        {modoReal && selectedUsuarioId && (
+          <SugerenciasRespuesta
+            key={selectedUsuarioId}
+            usuarioId={selectedUsuarioId}
+            onUsar={(t) => {
+              setInputTexto(t);
+              inputRef.current?.focus();
+            }}
+          />
+        )}
+
         {/* Barra de Respuestas Rápidas Basadas en Evidencia */}
         <div className="p-2.5 bg-slate-100/80 border-t border-slate-200 flex items-center gap-2 overflow-x-auto text-xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
@@ -199,23 +274,21 @@ export const ChatView: React.FC = () => {
           {/* Plantilla 1: Creatina */}
           <button
             onClick={() =>
-              enviarPlantilla(
-                'Sí, puedes incorporar Creatina Monohidratada (3 a 5g al día constantes). Es el suplemento ergogénico con mayor evidencia científica para aumentar reservas de fosfocreatina en series pesadas.',
-                'sugerencia_suplementacion'
+              usarPlantilla(
+                'Te sugiero considerar creatina monohidratada (3 a 5 g al día, constantes). Es el suplemento ergogénico con mayor evidencia para aumentar las reservas de fosfocreatina en series pesadas.'
               )
             }
             className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 rounded-md shrink-0 text-xs transition-colors"
           >
             <Pill className="w-3.5 h-3.5 text-teal-600" />
-            <span>Prescribir Creatina (5g/día)</span>
+            <span>Creatina (3-5 g/día)</span>
           </button>
 
           {/* Plantilla 2: Carbohidratos Peri-Entreno */}
           <button
             onClick={() =>
-              enviarPlantilla(
-                'Tu peso se ha mantenido estable. Te recomiendo concentrar 70g de carbohidratos 60-90 min antes de entrenar sentadilla para maximizar la repleción de glucógeno.',
-                'ajuste_plan'
+              usarPlantilla(
+                'Concentra los carbohidratos alrededor del entrenamiento (antes y después de la sesión). Cantidad indicada: ___ g.'
               )
             }
             className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-800 border border-slate-200 rounded-md shrink-0 text-xs transition-colors"
@@ -227,9 +300,8 @@ export const ChatView: React.FC = () => {
           {/* Plantilla 3: Alerta Proteica */}
           <button
             onClick={() =>
-              enviarPlantilla(
-                'Recuerda que tu meta de proteína es 1.7 g/kg. Evita sobrepasar los 2.0 g/kg, ya que la evidencia (Morton 2018) demuestra que no aporta mayor hipertrofia y aumenta la sobrecarga renal.',
-                'texto'
+              usarPlantilla(
+                'Recuerda mantener tu proteína dentro de la meta de tu plan. Evita sobrepasar 2.0 g/kg: la evidencia (Morton 2018) no muestra mayor hipertrofia y aumenta la carga renal.'
               )
             }
             className="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-rose-50 text-slate-700 hover:text-rose-800 border border-slate-200 rounded-md shrink-0 text-xs transition-colors"
@@ -242,6 +314,7 @@ export const ChatView: React.FC = () => {
         {/* Input Bar */}
         <form onSubmit={handleSend} className="p-3 bg-white border-t border-slate-200 flex items-center gap-3">
           <input
+            ref={inputRef}
             type="text"
             value={inputTexto}
             onChange={(e) => setInputTexto(e.target.value)}

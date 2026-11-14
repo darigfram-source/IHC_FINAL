@@ -16,6 +16,7 @@ import {
   User,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { cerrarSesion } from '@/lib/offline';
 
 export const NAV_ITEMS = [
   { label: 'Inicio', href: '/paciente/dashboard', icon: Home, description: 'Resumen diario y metas' },
@@ -30,9 +31,7 @@ export const PacienteNavigation: React.FC = () => {
   const router = useRouter();
 
   const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } finally {
+    if (await cerrarSesion()) {
       router.push('/');
       router.refresh();
     }

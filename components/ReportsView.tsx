@@ -31,7 +31,7 @@ export const ReportsView: React.FC = () => {
     'El paciente ha mantenido una constancia destacada en el registro de peso en ayunas y cargas. Se observa adaptación favorable al superávit calórico controlado (+400 kcal).'
   );
   const [recomendacionesTexto, setRecomendacionesTexto] = useState(
-    '1. Mantener creatina monohidratada 5g diarios continuos.\n2. Priorizar carbohidratos complejos en la ventana de 90 min pre-entrenamiento de sentadilla.\n3. Monitorear que la ingesta proteica no sobrepase 1.8 g/kg para mantener seguridad renal.'
+    '1. Priorizar carbohidratos complejos en la ventana de 90 min pre-entrenamiento de sentadilla.\n2. Monitorear que la ingesta proteica no sobrepase 1.8 g/kg para mantener seguridad renal.\n3. Continuar con el registro diario de peso en ayunas y cargas.'
   );
 
   const userReports = reportes.filter((r) => r.usuario_id === selectedUsuarioId);
@@ -308,19 +308,9 @@ export const ReportsView: React.FC = () => {
             </div>
 
             <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
-              <span className="text-slate-400 block text-[10px]">Carbohidratos Peri-Entreno:</span>
-              <span className="font-extrabold text-slate-900 text-sm">
-                {selectedUsuario?.carbs_peri_entreno_g}g
-              </span>
-              <span className="text-slate-500 text-[10px] block">
-                60-90 min pre-sesión
-              </span>
-            </div>
-
-            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-100">
-              <span className="text-slate-400 block text-[10px]">Suplementación Grado A:</span>
+              <span className="text-slate-400 block text-[10px]">Suplementación indicada:</span>
               <span className="font-bold text-teal-800 text-xs block leading-tight">
-                Creatina Monohidratada 5g/día
+                {selectedUsuario?.suplementacion_sugerida || 'Sin indicación registrada'}
               </span>
             </div>
           </div>

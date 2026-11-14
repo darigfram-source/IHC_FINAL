@@ -21,6 +21,10 @@ import {
   Award,
 } from 'lucide-react';
 import { PacienteTopBar } from '@/components/paciente/PacienteNavigation';
+import { ConsejoDelDia } from '@/components/paciente/ConsejoDelDia';
+import { avanceHaciaMeta } from '@/lib/metas';
+import { claveDia } from '@/lib/recordatorio';
+import { cargarPerfil, EVENTO_SINCRONIZADO } from '@/lib/offline';
 
 interface PacienteData {
   id: string;
@@ -34,22 +38,45 @@ interface PacienteData {
   nivel_entrenamiento: string;
   proteina_g_kg: number;
   superavit_kcal: number;
-  calorias_totales: number;
+  suplementacion_sugerida?: string | null;
+  recomendaciones_nutriologo?: Partial<Record<'suplementos' | 'hidratacion' | 'macros', { texto: string; fecha: string }>>;
   estado_hipertrofia: string;
   tendencia_cargas: string;
   registros?: any[];
   mensajes?: any[];
 }
 
+type CitaNutri = { texto: string; fecha: string } | undefined;
+
+const fechaCita = (iso: string) => {
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('es-MX', { day: 'numeric', month: 'long' });
+};
+
+/** Lo que el nutriólogo escribió (cita textual) o "Pendiente de tu nutriólogo". Nunca cifras inventadas. */
+function BloqueNutriologo({ cita }: { cita: CitaNutri }) {
+  if (!cita) return <p className="text-[11px] font-semibold opacity-90">Pendiente de tu nutriólogo</p>;
+  return (
+    <div className="space-y-0.5">
+      <p className="text-xs font-semibold leading-snug">“{cita.texto}”</p>
+      <p className="text-[10px] opacity-80">Tu nutriólogo{fechaCita(cita.fecha) ? `, ${fechaCita(cita.fecha)}` : ''}</p>
+    </div>
+  );
+}
+
 export default function PacienteDashboardPage() {
   const [data, setData] = useState<PacienteData | null>(null);
   const [loading, setLoading] = useState(true);
+  // 'datos' = cargó (de internet o de la copia del dispositivo); 'sesion' = sesión caducada; 'vacio' = sin internet y sin copia.
+  const [carga, setCarga] = useState<'datos' | 'sesion' | 'vacio'>('datos');
+  const [guardadoEn, setGuardadoEn] = useState<number | null>(null); // se llena solo si se muestra la copia del dispositivo
   const [fechaHoyStr, setFechaHoyStr] = useState('');
   const [fechaFormateada, setFechaFormateada] = useState('');
 
   useEffect(() => {
     const now = new Date();
-    setFechaHoyStr(now.toISOString().split('T')[0]);
+    // Fecha LOCAL: con toISOString() después de las 18:00 en México "hoy" ya sería mañana (UTC).
+    setFechaHoyStr(claveDia(now));
     setFechaFormateada(
       now.toLocaleDateString('es-MX', {
         weekday: 'long',
@@ -59,19 +86,21 @@ export default function PacienteDashboardPage() {
     );
 
     async function loadData() {
-      try {
-        const res = await fetch('/api/paciente/perfil');
-        const json = await res.json();
-        if (json.success && json.data) {
-          setData(json.data);
-        }
-      } catch (err) {
-        console.error('Error cargando perfil:', err);
-      } finally {
-        setLoading(false);
+      // Con internet trae lo último; sin internet muestra la copia guardada (más lo que se registró sin conexión).
+      const r = await cargarPerfil();
+      if (r.estado === 'ok') {
+        setData(r.perfil as unknown as PacienteData);
+        setGuardadoEn(r.desdeCache ? r.guardadoEn : null);
+        setCarga('datos');
+      } else {
+        setCarga(r.estado === 'sin-sesion' ? 'sesion' : 'vacio');
       }
+      setLoading(false);
     }
     loadData();
+    // Cuando se sube lo que estaba pendiente, se vuelven a pedir los datos.
+    window.addEventListener(EVENTO_SINCRONIZADO, loadData);
+    return () => window.removeEventListener(EVENTO_SINCRONIZADO, loadData);
   }, []);
 
   if (loading) {
@@ -89,24 +118,40 @@ export default function PacienteDashboardPage() {
     );
   }
 
-  const paciente = data || {
-    id: 'usr-paciente-01',
-    nombre: 'Paciente Activo',
-    email: 'paciente@nutrimasa.com',
-    edad: 24,
-    sexo: 'M',
-    estatura_cm: 178,
-    peso_actual: 78.4,
-    peso_objetivo: 82.0,
-    nivel_entrenamiento: 'Intermedio',
-    proteina_g_kg: 1.75,
-    superavit_kcal: 400,
-    calorias_totales: 2700,
-    estado_hipertrofia: 'En progreso',
-    tendencia_cargas: 'Suben',
-    registros: [],
-    mensajes: [],
-  };
+  if (!data) {
+    return (
+      <div className="w-full">
+        <PacienteTopBar titulo="Dashboard" subtitulo="No se pudo cargar tu plan" />
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div role="alert" className="p-5 rounded-3xl bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-3">
+            <p className="text-sm font-bold text-[var(--text)]">
+              {carga === 'sesion' ? 'Tu sesión caducó.' : 'No hay conexión y todavía no hay datos guardados en este dispositivo.'}
+            </p>
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+              {carga === 'sesion'
+                ? 'Inicia sesión de nuevo para ver tu plan.'
+                : 'Abre NutriMasa una vez con internet y tus datos quedarán guardados para consultarlos sin conexión.'}
+            </p>
+            {carga === 'sesion' ? (
+              <Link href="/paciente/login" className="inline-flex items-center min-h-[44px] px-4 rounded-xl bg-[var(--primary)] text-white text-xs font-bold">
+                Iniciar sesión
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="inline-flex items-center min-h-[44px] px-4 rounded-xl bg-[var(--primary)] text-white text-xs font-bold cursor-pointer"
+              >
+                Reintentar
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const paciente = data;
 
   const peso = Number(paciente.peso_actual || 75);
   const objetivo = Number(paciente.peso_objetivo || 80);
@@ -124,8 +169,16 @@ export default function PacienteDashboardPage() {
   // Último mensaje del nutriólogo
   const ultimoMensaje = paciente.mensajes?.slice(-1)[0];
 
-  // Cálculo de progreso porcentual
-  const porcentajeProgreso = Math.min(100, Math.max(10, Math.round((peso / objetivo) * 100)));
+  // Avance desde el primer peso registrado hasta la meta (igual que la app). Sin registros no hay de dónde medirlo.
+  const pesosRegistrados = (paciente.registros ?? [])
+    .map((r) => Number(r.peso_ayunas))
+    .filter((p) => Number.isFinite(p) && p > 0);
+  const avance = avanceHaciaMeta({
+    pesoInicial: pesosRegistrados.length ? pesosRegistrados[0] : null,
+    pesoActual: peso,
+    meta: objetivo,
+  });
+  const porcentajeProgreso = avance?.pct ?? 0;
 
   return (
     <div className="w-full min-h-full">
@@ -138,6 +191,14 @@ export default function PacienteDashboardPage() {
 
       {/* Contenedor Centrado y Fluido (max-w-7xl, clamp de padding) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {guardadoEn !== null && (
+          <p role="status" className="p-3 rounded-2xl bg-[var(--surface)] border border-[var(--border)] text-xs font-semibold text-[var(--text-muted)]">
+            Estás viendo los datos guardados en este dispositivo (última actualización:{' '}
+            {new Date(guardadoEn).toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}). Se
+            actualizan solos cuando vuelva la conexión.
+          </p>
+        )}
+
         {/* BANNER DE BIENVENIDA / HERO FLUIDO */}
         <section
           aria-label="Resumen de bienvenida"
@@ -178,6 +239,9 @@ export default function PacienteDashboardPage() {
           {/* Adorno visual de fondo */}
           <div className="absolute -right-8 -bottom-12 w-64 h-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         </section>
+
+        {/* CONSEJO DEL DÍA (IA con respaldo de lista fija) */}
+        <ConsejoDelDia />
 
         {/* ====================================================================
             LAYOUT GRID RESPONSIVO:
@@ -256,13 +320,17 @@ export default function PacienteDashboardPage() {
                   <div className="mt-2 text-xs font-semibold text-[var(--text-muted)]">
                     {faltaSubir ? `Faltan +${diffPeso} kg de masa` : `Variación: ${diffPeso} kg`}
                   </div>
+                  <Link href="/paciente/metas" className="mt-1.5 inline-block text-xs font-bold text-[var(--primary-text)] underline">
+                    Ver o cambiar mi meta
+                  </Link>
                 </div>
               </div>
 
               {/* Barra de Progreso Accesible */}
+              {avance && (
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs font-semibold text-[var(--text-muted)]">
-                  <span>Progreso hacia objetivo magro</span>
+                  <span>Avance hacia tu meta</span>
                   <span className="font-bold text-[var(--text)]">{porcentajeProgreso}%</span>
                 </div>
                 <div
@@ -278,7 +346,11 @@ export default function PacienteDashboardPage() {
                     style={{ width: `${porcentajeProgreso}%` }}
                   />
                 </div>
+                <p className="text-xs text-[var(--text-muted)]">
+                  {avance.mensaje}
+                </p>
               </div>
+              )}
             </article>
 
             {/* 2. TARJETA: PRESCRIPCIÓN DEL DÍA (4 Subtarjetas en Grid Adaptable) */}
@@ -336,41 +408,50 @@ export default function PacienteDashboardPage() {
                     +{paciente.superavit_kcal || 400} kcal
                   </div>
                   <p className="text-[11px] font-medium text-[var(--warning-text)] opacity-90">
-                    Meta: {paciente.calorias_totales || 2700} kcal/día
+                    sobre tu dieta habitual
                   </p>
                 </div>
 
-                {/* 3. Hidratación */}
-                <div className="p-4 rounded-2xl bg-[var(--cyan-surface)] border border-[var(--cyan-border)] space-y-1">
+                {/* 3. Hidratación: solo la referencia general; lo personal lo indica el nutriólogo */}
+                <div className="p-4 rounded-2xl bg-[var(--cyan-surface)] border border-[var(--cyan-border)] space-y-1.5 text-[var(--cyan-text)]">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--cyan-text)]">
-                      Hidratación
-                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Hidratación</span>
                     <Droplet className="w-4 h-4 text-[var(--cyan)]" />
                   </div>
-                  <div className="text-2xl font-black text-[var(--cyan-text)]">
-                    3.5 - 4.0 L
-                  </div>
-                  <p className="text-[11px] font-medium text-[var(--cyan-text)] opacity-90">
-                    Agua diaria recomendada
+                  <div className="text-2xl font-black">2 – 2.5 L</div>
+                  <p className="text-[11px] font-medium opacity-90">
+                    Referencia general al día (más si sudas mucho). No es una indicación personal.
                   </p>
+                  {paciente.recomendaciones_nutriologo?.hidratacion && (
+                    <BloqueNutriologo cita={paciente.recomendaciones_nutriologo.hidratacion} />
+                  )}
                 </div>
-
-                {/* 4. Creatina */}
-                <div className="p-4 rounded-2xl bg-[var(--purple-surface)] border border-[var(--purple-border)] space-y-1">
+                {/* 4. Suplementación: solo si el nutriólogo la indicó */}
+                <div className="p-4 rounded-2xl bg-[var(--purple-surface)] border border-[var(--purple-border)] space-y-1.5 text-[var(--purple-text)]">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--purple-text)]">
-                      Suplementación
-                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Suplementación</span>
                     <Award className="w-4 h-4 text-[var(--purple)]" />
                   </div>
-                  <div className="text-2xl font-black text-[var(--purple-text)]">
-                    5 g / día
-                  </div>
-                  <p className="text-[11px] font-medium text-[var(--purple-text)] opacity-90">
-                    Creatina monohidrato continua
-                  </p>
+                  {paciente.suplementacion_sugerida ? (
+                    <>
+                      <div className="text-sm font-black leading-snug">{paciente.suplementacion_sugerida}</div>
+                      <p className="text-[11px] font-medium opacity-90">Indicado por tu nutriólogo</p>
+                    </>
+                  ) : (
+                    <>
+                      <BloqueNutriologo cita={paciente.recomendaciones_nutriologo?.suplementos} />
+                      <p className="text-[10px] opacity-80">Los suplementos los valida un nutriólogo.</p>
+                    </>
+                  )}
                 </div>
+              </div>
+
+              {/* Calorías y macronutrientes: los define el nutriólogo */}
+              <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border)] space-y-1.5 text-[var(--text)]">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-subtle)]">
+                  Calorías y macronutrientes
+                </span>
+                <BloqueNutriologo cita={paciente.recomendaciones_nutriologo?.macros} />
               </div>
 
               {/* Guía Informativa */}
@@ -431,7 +512,10 @@ export default function PacienteDashboardPage() {
                     <h4 className="text-xs font-bold">¡Registro de hoy completado!</h4>
                   </div>
                   <p className="text-xs opacity-90">
-                    Peso registrado: <strong>{registroHoy.peso_ayunas} kg</strong>. Datos sincronizados con tu nutriólogo.
+                    Peso registrado: <strong>{registroHoy.peso_ayunas} kg</strong>.{' '}
+                    {registroHoy.pendiente_subida
+                      ? 'Guardado en este dispositivo: se subirá cuando haya internet.'
+                      : 'Datos sincronizados con tu nutriólogo.'}
                   </p>
                   <Link
                     href="/paciente/diario"

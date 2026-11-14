@@ -1,133 +1,124 @@
 import { NextResponse } from 'next/server';
-import { query, hasDbConnection } from '@/lib/db';
-import { hashPassword, createSessionToken, COOKIE_NAME } from '@/lib/auth';
+import { crearClienteServidor } from '@/lib/supabase/server';
+import { asegurarUsuario } from '@/lib/perfil';
+import { motivosExclusion } from '@/lib/elegibilidad';
+
+const falla = (error: string, status: number) =>
+  NextResponse.json({ success: false, error }, { status });
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const {
-      nombre,
-      email,
-      password,
-      edad = 24,
-      estatura_cm = 175,
-      peso_actual = 70.0,
-      peso_objetivo = 75.0,
-      nivel_entrenamiento = 'Intermedio',
-      condicion_renal_diabetes = false,
-      embarazo_lactancia = false,
-      trastorno_conducta_alimentaria = false,
-      consentimiento_informado = true,
-    } = body;
+    const b = await request.json();
+    const nombre = String(b.nombre ?? '').trim();
+    const email = String(b.email ?? '').trim().toLowerCase();
+    const password = String(b.password ?? '');
 
-    if (!email || !password || !nombre) {
+    if (!nombre || !email || !password) return falla('Nombre, correo y contraseña son obligatorios', 400);
+    if (password.length < 8) return falla('La contraseña debe tener al menos 8 caracteres.', 400);
+
+    // Criterios de exclusión y consentimiento: se revalidan en el servidor (el front se puede saltar).
+    // Se juntan todos los motivos para poder mostrarlos de una vez, como hace la app.
+    const motivos = motivosExclusion({
+      edad: b.edad,
+      nivel_entrenamiento: b.nivel_entrenamiento,
+      sin_enfermedad_renal: b.sin_enfermedad_renal,
+      sin_diabetes: b.sin_diabetes,
+      sin_embarazo_lactancia: b.sin_embarazo_lactancia,
+      sin_trastornos_alimenticios: b.sin_trastornos_alimenticios,
+      experiencia_minima: b.experiencia_minima,
+    });
+    if (motivos.length) {
       return NextResponse.json(
-        { success: false, error: 'Nombre, correo y contraseña son obligatorios' },
-        { status: 400 }
+        { success: false, error: 'Por seguridad, NutriMasa no es la opción adecuada para tu perfil. Te recomendamos acudir con un profesional de la salud.', motivos },
+        { status: 422 }
       );
     }
+    if (b.consentimiento_informado !== true) return falla('Debes aceptar el consentimiento informado.', 400);
 
-    const cleanEmail = email.trim().toLowerCase();
-    const userId = `usr-${Date.now()}`;
-    const pwdHash = await hashPassword(password);
-
-    // Calcular valores iniciales de hipertrofia (Morton 2018, Urdampilleta 2012)
-    const proteina_g_kg = 1.75;
-    const superavit_kcal = 450;
-    const calorias_mantenimiento = Math.round(Number(peso_actual) * 32);
-    const calorias_totales = calorias_mantenimiento + superavit_kcal;
-    const carbohidratos_g = Math.round((calorias_totales * 0.55) / 4);
-    const carbs_peri_entreno_g = 75;
-    const grasas_g = Math.round(Number(peso_actual) * 0.95);
-
-    const elegible = !condicion_renal_diabetes && !embarazo_lactancia && !trastorno_conducta_alimentaria;
-
-    if (hasDbConnection()) {
-      try {
-        // Verificar existencia
-        const existing = await query('SELECT id FROM usuarios WHERE LOWER(email) = $1', [cleanEmail]);
-        if (existing && existing.length > 0) {
-          return NextResponse.json(
-            { success: false, error: 'Ya existe una cuenta registrada con este correo electrónico.' },
-            { status: 409 }
-          );
-        }
-
-        // Insertar usuario
-        await query(
-          'INSERT INTO usuarios (id, email, password_hash, rol, nombre) VALUES ($1, $2, $3, $4, $5)',
-          [userId, cleanEmail, pwdHash, 'paciente', nombre]
-        );
-
-        // Insertar perfil de paciente
-        await query(
-          `INSERT INTO perfiles_paciente (
-            usuario_id, nutriologo_id, edad, estatura_cm, peso_inicial, peso_actual, peso_objetivo,
-            nivel_entrenamiento, condicion_renal_diabetes, embarazo_lactancia, trastorno_conducta_alimentaria,
-            elegible, consentimiento_informado, proteina_g_kg, superavit_kcal, calorias_mantenimiento,
-            calorias_totales, carbohidratos_g, carbs_peri_entreno_g, grasas_g, suplementacion_sugerida,
-            estado, tendencia_cargas
-          ) VALUES (
-            $1, 'usr-admin', $2, $3, $4, $4, $5,
-            $6, $7, $8, $9,
-            $10, $11, $12, $13, $14,
-            $15, $16, $17, $18, 'Creatina Monohidratada 5g/día constante',
-            'En progreso', 'Suben'
-          )`,
-          [
-            userId,
-            edad,
-            estatura_cm,
-            peso_actual,
-            peso_objetivo,
-            nivel_entrenamiento,
-            condicion_renal_diabetes,
-            embarazo_lactancia,
-            trastorno_conducta_alimentaria,
-            elegible,
-            consentimiento_informado,
-            proteina_g_kg,
-            superavit_kcal,
-            calorias_mantenimiento,
-            calorias_totales,
-            carbohidratos_g,
-            carbs_peri_entreno_g,
-            grasas_g,
-          ]
-        );
-      } catch (dbErr) {
-        console.error('Error insertando usuario en BD:', dbErr);
-      }
+    const edad = Number(b.edad);
+    const estatura = Number(b.estatura_cm);
+    const peso = Number(b.peso_actual);
+    const meta = Number(b.peso_objetivo);
+    if (!(edad >= 18 && edad <= 40)) return falla('El rango de edad del protocolo es de 18 a 40 años.', 422);
+    if (!(estatura >= 120 && estatura <= 230) || !(peso >= 30 && peso <= 250) || !(meta >= 30 && meta <= 250)) {
+      return falla('Revisa estatura y peso: hay valores fuera de rango.', 400);
     }
 
-    // Crear sesión
-    const token = await createSessionToken({
-      userId,
-      email: cleanEmail,
-      nombre,
-      rol: 'paciente',
+    // Nutriólogo elegido (solo si hay varios activos). Aquí no hay sesión para validarlo:
+    // asegurarUsuario comprueba que siga activo al crear la fila y, si no, asigna al primero.
+    const nutriologoId = typeof b.nutriologo_id === 'string' && b.nutriologo_id.length > 0 && b.nutriologo_id.length <= 64 ? b.nutriologo_id : undefined;
+
+    const nivel = b.nivel_entrenamiento === 'Principiante' ? 'Principiante' : 'Intermedio';
+    const supabase = await crearClienteServidor();
+    const origin = new URL(request.url).origin;
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${origin}/auth/callback`,
+        data: {
+          perfil: {
+            nombre,
+            edad,
+            estatura_cm: estatura,
+            peso_actual: peso,
+            peso_objetivo: meta,
+            nivel_entrenamiento: nivel,
+            consentimiento_informado: true,
+            ...(nutriologoId ? { nutriologo_id: nutriologoId } : {}),
+          },
+        },
+      },
     });
 
-    const response = NextResponse.json({
-      success: true,
-      user: { id: userId, email: cleanEmail, nombre, rol: 'paciente' },
-      redirectTo: '/paciente/dashboard',
-    });
+    if (error) {
+      console.error('registro:', error.status, error.code, error.message);
+      const msg = (error.message || '').toLowerCase();
+      let texto = 'No se pudo crear la cuenta. Revisa los datos e inténtalo de nuevo.';
+      let status = 400;
 
-    response.cookies.set(COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60,
-    });
+      if (error.code === 'over_email_send_rate_limit' || error.status === 429) {
+        texto = 'Se enviaron demasiados correos de confirmación. Espera unos minutos e inténtalo de nuevo.';
+        status = 429;
+      } else if (error.code === 'weak_password') {
+        texto = 'La contraseña es muy débil. Usa 8 o más caracteres, mezclando letras y números.';
+      } else if (error.code === 'email_address_invalid') {
+        texto = 'Ese correo no es válido o no se aceptan correos de ese dominio.';
+      } else if (error.code === 'signup_disabled') {
+        texto = 'El registro de nuevas cuentas está desactivado en Supabase.';
+        status = 403;
+      } else if (error.code === 'user_already_exists') {
+        texto = 'Ya existe una cuenta con ese correo. Inicia sesión.';
+        status = 409;
+      } else if (msg.includes('invalid api key') || error.status === 401) {
+        texto = 'La llave de Supabase en .env.local no es válida. Revisa NEXT_PUBLIC_SUPABASE_ANON_KEY.';
+        status = 500;
+      } else if (msg.includes('fetch failed') || error.status === 0) {
+        texto = 'No se pudo conectar con Supabase. Revisa NEXT_PUBLIC_SUPABASE_URL y tu internet.';
+        status = 502;
+      } else if (msg.includes('database error')) {
+        texto = 'Supabase falló al guardar la cuenta (error de base de datos). Revisa los logs de Auth.';
+        status = 500;
+      }
+      // En desarrollo se añade el código técnico para depurar más rápido.
+      if (process.env.NODE_ENV !== 'production') texto += ` [${error.code ?? error.status}: ${error.message}]`;
+      return falla(texto, status);
+    }
 
-    return response;
-  } catch (err: any) {
-    console.error('Error en registro:', err);
-    return NextResponse.json(
-      { success: false, error: 'Error al registrar nuevo paciente' },
-      { status: 500 }
-    );
+    // Con confirmación de correo activa no hay sesión todavía: se pide confirmar.
+    if (!data.session || !data.user) {
+      return NextResponse.json({
+        success: true,
+        needsConfirmation: true,
+        message: 'Te enviamos un enlace de confirmación. Ábrelo y luego inicia sesión.',
+      });
+    }
+
+    await asegurarUsuario(supabase, data.user);
+    return NextResponse.json({ success: true, redirectTo: '/paciente/dashboard' });
+  } catch (e) {
+    console.error('registro:', e);
+    return falla('Error al registrar nuevo paciente', 500);
   }
 }
