@@ -35,7 +35,6 @@ export default function PacienteDiarioPage() {
   const [error, setError] = useState('');
   const [alertaProteina, setAlertaProteina] = useState(false);
 
-  // Cargar datos previos si existen
   useEffect(() => {
     setFecha(new Date().toISOString().split('T')[0]);
 
@@ -62,7 +61,6 @@ export default function PacienteDiarioPage() {
     loadTodayLog();
   }, []);
 
-  // Verificar en tiempo real alerta de exceso de proteína (> 2.0 g/kg)
   useEffect(() => {
     const pesoNum = Number(pesoAyunas);
     const protNum = Number(proteinaG);
@@ -135,7 +133,6 @@ export default function PacienteDiarioPage() {
       />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Banner de retroalimentación de éxito */}
         {success && (
           <div
             role="status"
@@ -151,7 +148,6 @@ export default function PacienteDiarioPage() {
           </div>
         )}
 
-        {/* Mensaje de error */}
         {error && (
           <div
             role="alert"
@@ -162,14 +158,9 @@ export default function PacienteDiarioPage() {
           </div>
         )}
 
-        {/* Formulario Principal Adaptable */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* ==============================================================
-                COLUMNA 1: FECHA, PESO EN AYUNAS Y CARGAS (lg:col-span-7)
-                ============================================================== */}
             <div className="lg:col-span-7 space-y-6">
-              {/* Fecha y Peso en Ayunas */}
               <div className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -184,7 +175,6 @@ export default function PacienteDiarioPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Fecha */}
                   <div>
                     <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5 flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5" />
@@ -199,7 +189,6 @@ export default function PacienteDiarioPage() {
                     />
                   </div>
 
-                  {/* Peso en Ayunas */}
                   <div>
                     <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5 flex items-center gap-1.5">
                       <Scale className="w-3.5 h-3.5" />
@@ -227,7 +216,6 @@ export default function PacienteDiarioPage() {
                 </p>
               </div>
 
-              {/* Sobrecarga Progresiva (Sentadilla, Prensa/Banca, Volumen) */}
               <div className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -242,7 +230,6 @@ export default function PacienteDiarioPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Sentadilla */}
                   <div>
                     <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5">
                       Sentadilla (kg)
@@ -262,7 +249,6 @@ export default function PacienteDiarioPage() {
                     </div>
                   </div>
 
-                  {/* Press de Banca */}
                   <div>
                     <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5">
                       Press de Banca (kg)
@@ -283,7 +269,6 @@ export default function PacienteDiarioPage() {
                   </div>
                 </div>
 
-                {/* Volumen total */}
                 <div>
                   <label className="block text-xs font-bold text-[var(--text-muted)] uppercase mb-1.5 flex items-center gap-1.5">
                     <Layers className="w-3.5 h-3.5" />
@@ -303,11 +288,7 @@ export default function PacienteDiarioPage() {
               </div>
             </div>
 
-            {/* ==============================================================
-                COLUMNA 2: PROTEÍNA, NOTAS Y ENVÍO (lg:col-span-5)
-                ============================================================== */}
             <div className="lg:col-span-5 space-y-6">
-              {/* Proteína con Alerta Médica > 2.0 g/kg */}
               <div className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -339,7 +320,6 @@ export default function PacienteDiarioPage() {
                   </div>
                 </div>
 
-                {/* ALERTA CIENTÍFICA SI SUPERA 2.0 g/kg (WCAG AA) */}
                 {alertaProteina ? (
                   <div
                     role="alert"
@@ -361,7 +341,6 @@ export default function PacienteDiarioPage() {
                 )}
               </div>
 
-              {/* Sensaciones / Notas */}
               <div className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-3">
                 <label className="block text-xs font-bold text-[var(--text-muted)] uppercase flex items-center gap-1.5">
                   <FileText className="w-3.5 h-3.5" />
@@ -376,7 +355,6 @@ export default function PacienteDiarioPage() {
                 />
               </div>
 
-              {/* Botón de Enviar */}
               <button
                 type="submit"
                 disabled={loading}

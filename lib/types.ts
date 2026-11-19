@@ -1,7 +1,3 @@
-// ============================================================================
-// TIPOS DE DATOS: NUTRIMASA
-// Basado en el documento de propuesta académica NutriMasa Pro
-// ============================================================================
 
 export type EstadoPaciente = 'En progreso' | 'Estancado' | 'Peso sube, cargas no';
 export type TendenciaCargas = 'Suben' | 'Sin cambio' | 'Bajan';
@@ -18,8 +14,8 @@ export interface Nutriologo {
 export interface RegistroDiario {
   id: string;
   usuario_id: string;
-  fecha: string; // YYYY-MM-DD
-  peso_ayunas: number; // kg
+  fecha: string;
+  peso_ayunas: number;
   sentadilla_kg: number;
   press_banca_kg: number;
   peso_muerto_kg?: number;
@@ -27,7 +23,7 @@ export interface RegistroDiario {
   series_efectivas: number;
   proteina_consumida_g: number;
   calorias_consumidas: number;
-  alerta_exceso_proteina?: boolean; // Se activa si ingesta supera 2.0 g/kg
+  alerta_exceso_proteina?: boolean;
   notas?: string;
 }
 
@@ -43,9 +39,8 @@ export interface Usuario {
   peso_objetivo: number;
   nivel_entrenamiento: 'Principiante' | 'Intermedio';
   
-  // Parámetros calculados y recomendados (Morton 2018, Urdampilleta 2012)
-  proteina_g_kg: number; // 1.6 - 1.8 g/kg (Tope máx 2.0 g/kg)
-  superavit_kcal: number; // 400 - 500 kcal
+  proteina_g_kg: number;
+  superavit_kcal: number;
   calorias_mantenimiento: number;
   calorias_totales: number;
   carbohidratos_g: number;
@@ -53,18 +48,15 @@ export interface Usuario {
   grasas_g: number;
   suplementacion_sugerida: string;
   
-  // Estado en la vista del Nutriólogo (Figura 8)
   estado: EstadoPaciente;
   tendencia_cargas: TendenciaCargas;
   
-  // Elegibilidad y privacidad (LFPDPPP)
   condicion_renal_diabetes: boolean;
   embarazo_lactancia: boolean;
   trastorno_conducta_alimentaria: boolean;
   elegible: boolean;
   consentimiento_informado: boolean;
   
-  // Registros históricos asociados
   registros?: RegistroDiario[];
 }
 

@@ -1,7 +1,3 @@
-// ============================================================================
-// DATOS INICIALES REALISTAS PARA NUTRIMASA
-// Basado en el maquetado y especificaciones de NutriMasa
-// ============================================================================
 import { Nutriologo, Usuario, RegistroDiario, MensajeChat, ArticuloEducativo, Reporte } from '../types';
 
 export const INITIAL_NUTRIOLOGO: Nutriologo = {
@@ -13,7 +9,6 @@ export const INITIAL_NUTRIOLOGO: Nutriologo = {
   especialidad: 'Nutrición Deportiva e Hipertrofia Muscular',
 };
 
-// Generación de registros para gráficos de 4 semanas
 const generateRegistrosUser02 = (): RegistroDiario[] => [
   {
     id: 'reg-02-1',

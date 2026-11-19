@@ -36,12 +36,10 @@ export const UserInspector: React.FC = () => {
   const registros = selectedUsuario.registros || [];
   const ultimoRegistro = registros[registros.length - 1];
 
-  // Cálculo de gramos totales de proteína
   const gramosProteina = Math.round(selectedUsuario.proteina_g_kg * selectedUsuario.peso_actual);
 
   return (
     <div className="w-80 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col select-none overflow-hidden shrink-0">
-      {/* Header (Fiel a Figura 8: "Usuario 02") */}
       <div className="p-4 border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white">
         <div className="flex items-center justify-between">
           <div>
@@ -61,7 +59,6 @@ export const UserInspector: React.FC = () => {
           </button>
         </div>
 
-        {/* Diagnóstico rápido */}
         <div className="mt-2.5 flex items-center justify-between text-xs">
           <span className="text-slate-500">Estado de hipertrofia:</span>
           <span
@@ -78,7 +75,6 @@ export const UserInspector: React.FC = () => {
         </div>
       </div>
 
-      {/* Gráfica de peso (Fiel a Figura 8: "Peso, últimas 4 semanas") */}
       <div className="p-4 border-b border-slate-100">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-bold text-slate-700">Peso, últimas 4 semanas</span>
@@ -87,7 +83,6 @@ export const UserInspector: React.FC = () => {
           </span>
         </div>
 
-        {/* Gráfica SVG interactiva */}
         <div className="bg-slate-50/70 p-2.5 rounded-lg border border-slate-100">
           <WeightChart
             registros={registros}
@@ -96,7 +91,6 @@ export const UserInspector: React.FC = () => {
           />
         </div>
 
-        {/* Cargas actuales en sentadilla y banca */}
         <div className="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-slate-100 text-xs">
           <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
             <span className="text-[10px] text-slate-500 block">Sentadilla</span>
@@ -113,7 +107,6 @@ export const UserInspector: React.FC = () => {
         </div>
       </div>
 
-      {/* Resumen nutricional calculado (Morton 2018, Urdampilleta 2012) */}
       <div className="p-4 bg-emerald-50/30 border-b border-slate-100 space-y-2">
         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
           Prescripción Activa
@@ -148,9 +141,7 @@ export const UserInspector: React.FC = () => {
         </div>
       </div>
 
-      {/* Acciones del Inspector (Fieles a la Figura 8 del maquetado) */}
       <div className="p-4 space-y-2.5 mt-auto bg-slate-50/60">
-        {/* Botón 1: Ajustar superávit */}
         <button
           onClick={() => setIsAdjustModalOpen(true)}
           className="w-full py-2.5 px-4 bg-[#14532d] hover:bg-[#166534] active:bg-[#0f3d21] text-white text-xs font-semibold rounded-lg shadow-sm transition-all flex items-center justify-center gap-2"
@@ -159,7 +150,6 @@ export const UserInspector: React.FC = () => {
           <span>Ajustar superávit</span>
         </button>
 
-        {/* Botón 2: Escribir mensaje */}
         <button
           onClick={() => setActiveTab('mensajes')}
           className="w-full py-2.5 px-4 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg shadow-2xs transition-all flex items-center justify-center gap-2"
@@ -168,7 +158,6 @@ export const UserInspector: React.FC = () => {
           <span>Escribir mensaje</span>
         </button>
 
-        {/* Botón 3: Exportar reporte */}
         <button
           onClick={() => setIsReportModalOpen(true)}
           className="w-full py-2.5 px-4 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold rounded-lg shadow-2xs transition-all flex items-center justify-center gap-2"

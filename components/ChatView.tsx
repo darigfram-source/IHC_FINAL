@@ -28,7 +28,6 @@ export const ChatView: React.FC = () => {
 
   const [inputTexto, setInputTexto] = useState('');
 
-  // Mensajes correspondientes al usuario seleccionado
   const userMessages = mensajes.filter((m) => m.usuario_id === selectedUsuarioId);
 
   const handleSend = (e?: React.FormEvent) => {
@@ -38,14 +37,12 @@ export const ChatView: React.FC = () => {
     setInputTexto('');
   };
 
-  // Plantillas clínicas rápidas basadas en evidencia (Urdampilleta 2012, Morton 2018)
   const enviarPlantilla = (texto: string, tipo: 'sugerencia_suplementacion' | 'ajuste_plan' | 'texto') => {
     enviarMensaje(texto, tipo, selectedUsuarioId);
   };
 
   return (
     <div className="flex-1 flex bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden h-[calc(100vh-6.5rem)]">
-      {/* Columna Izquierda: Lista de Pacientes para Chat */}
       <div className="w-72 border-r border-slate-200 bg-slate-50/50 flex flex-col shrink-0">
         <div className="p-3.5 border-b border-slate-200 bg-white">
           <h3 className="font-bold text-sm text-slate-800">Mensajes Asíncronos</h3>
@@ -104,9 +101,7 @@ export const ChatView: React.FC = () => {
         </div>
       </div>
 
-      {/* Columna Derecha: Conversación Activa */}
       <div className="flex-1 flex flex-col bg-slate-50/30">
-        {/* Header del Chat */}
         <div className="p-3.5 bg-white border-b border-slate-200 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-sm border border-emerald-300">
@@ -133,7 +128,6 @@ export const ChatView: React.FC = () => {
           </button>
         </div>
 
-        {/* AVISO LEGAL FIJO Y OBLIGATORIO (Especificado en Requerimiento 9 y Figura 6) */}
         <div className="bg-amber-50/90 border-b border-amber-200/90 px-4 py-2.5 flex items-center gap-2.5 text-xs text-amber-900 shadow-2xs">
           <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
           <p className="font-medium">
@@ -141,7 +135,6 @@ export const ChatView: React.FC = () => {
           </p>
         </div>
 
-        {/* Historial de Mensajes */}
         <div className="flex-1 p-4 overflow-y-auto space-y-3">
           {userMessages.length === 0 ? (
             <div className="text-center py-12 text-slate-400 text-xs">
@@ -162,7 +155,6 @@ export const ChatView: React.FC = () => {
                         : 'bg-white text-slate-800 border border-slate-200 rounded-bl-xs'
                     }`}
                   >
-                    {/* Badge especial si es ajuste o sugerencia */}
                     {msg.tipo === 'ajuste_plan' && (
                       <span className="inline-block text-[10px] font-bold uppercase tracking-wider bg-emerald-700 text-emerald-100 px-2 py-0.5 rounded mb-1">
                         Ajuste Nutricional Clínico
@@ -190,13 +182,11 @@ export const ChatView: React.FC = () => {
           )}
         </div>
 
-        {/* Barra de Respuestas Rápidas Basadas en Evidencia */}
         <div className="p-2.5 bg-slate-100/80 border-t border-slate-200 flex items-center gap-2 overflow-x-auto text-xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
             Sugerencias Clínicas:
           </span>
 
-          {/* Plantilla 1: Creatina */}
           <button
             onClick={() =>
               enviarPlantilla(
@@ -210,7 +200,6 @@ export const ChatView: React.FC = () => {
             <span>Prescribir Creatina (5g/día)</span>
           </button>
 
-          {/* Plantilla 2: Carbohidratos Peri-Entreno */}
           <button
             onClick={() =>
               enviarPlantilla(
@@ -224,7 +213,6 @@ export const ChatView: React.FC = () => {
             <span>Carbos Peri-Entreno</span>
           </button>
 
-          {/* Plantilla 3: Alerta Proteica */}
           <button
             onClick={() =>
               enviarPlantilla(
@@ -239,7 +227,6 @@ export const ChatView: React.FC = () => {
           </button>
         </div>
 
-        {/* Input Bar */}
         <form onSubmit={handleSend} className="p-3 bg-white border-t border-slate-200 flex items-center gap-3">
           <input
             type="text"

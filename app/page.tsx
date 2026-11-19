@@ -20,7 +20,6 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 export default function WelcomePortalPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#06140e] via-[#0a1f16] to-[#040e0a] text-white flex flex-col justify-between selection:bg-emerald-500 selection:text-white">
-      {/* Barra de Encabezado Superior */}
       <header className="px-6 py-5 border-b border-emerald-950/60 bg-black/20 backdrop-blur-md flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-950/60 border border-emerald-300/30">
@@ -51,9 +50,7 @@ export default function WelcomePortalPage() {
         </div>
       </header>
 
-      {/* Hero Central */}
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-12 flex flex-col items-center justify-center text-center">
-        {/* Badge superior */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/80 border border-emerald-500/30 text-emerald-300 text-xs font-semibold mb-6 shadow-md">
           <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
           <span>Plataforma Clínica de Hipertrofia y Sobrecarga Progresiva</span>
@@ -71,9 +68,7 @@ export default function WelcomePortalPage() {
           Conectamos a deportistas de fuerza con especialistas certificados. Registro diario en menos de 30 segundos, alertas de composición y ajuste dinámico de macronutrientes.
         </p>
 
-        {/* LAS DOS PUERTAS DE ACCESO (Requisito 1: "Soy paciente" y "Soy nutriólogo") */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl mt-10 text-left">
-          {/* Tarjeta 1: Acceso Paciente */}
           <div className="bg-gradient-to-b from-white/10 to-white/5 border border-emerald-500/30 hover:border-emerald-400 rounded-3xl p-6 sm:p-8 backdrop-blur-md transition-all hover:shadow-2xl hover:shadow-emerald-950/80 flex flex-col justify-between group">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-emerald-600/30 text-emerald-300 flex items-center justify-center mb-5 border border-emerald-400/30 group-hover:scale-105 transition-transform">
@@ -116,7 +111,6 @@ export default function WelcomePortalPage() {
             </div>
           </div>
 
-          {/* Tarjeta 2: Acceso Nutriólogo */}
           <div className="bg-gradient-to-b from-[#0c261b] to-[#081b13] border border-emerald-700/40 hover:border-emerald-500 rounded-3xl p-6 sm:p-8 backdrop-blur-md transition-all hover:shadow-2xl hover:shadow-emerald-950/80 flex flex-col justify-between group">
             <div>
               <div className="w-12 h-12 rounded-2xl bg-teal-500/20 text-teal-300 flex items-center justify-center mb-5 border border-teal-400/30 group-hover:scale-105 transition-transform">
@@ -154,7 +148,6 @@ export default function WelcomePortalPage() {
           </div>
         </div>
 
-        {/* Ficha Informativa de Cuentas Demo de Prueba */}
         <div className="mt-10 p-4 bg-black/40 border border-emerald-900/60 rounded-2xl max-w-2xl w-full text-xs text-left">
           <div className="flex items-center gap-2 text-emerald-400 font-bold mb-2">
             <ShieldCheck className="w-4 h-4" />
@@ -181,7 +174,6 @@ export default function WelcomePortalPage() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="px-6 py-4 border-t border-emerald-950/60 text-center text-[11px] text-emerald-400/50">
         NutriMasa Pro • Plataforma Médica y Deportiva • Cumplimiento con LFPDPPP y Consentimiento Informado
       </footer>

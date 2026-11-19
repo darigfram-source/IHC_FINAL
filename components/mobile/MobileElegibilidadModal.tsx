@@ -58,7 +58,6 @@ export const MobileElegibilidadModal: React.FC<MobileElegibilidadModalProps> = (
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto text-slate-800">
-        {/* Header (Fiel a Figura 2 del PDF) */}
         <div className="text-center mb-5">
           <div className="w-10 h-10 mx-auto rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mb-2">
             <ShieldCheck className="w-5 h-5" />
@@ -70,7 +69,6 @@ export const MobileElegibilidadModal: React.FC<MobileElegibilidadModalProps> = (
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-          {/* Fila Edad, Peso, Estatura */}
           <div className="grid grid-cols-3 gap-2">
             <div>
               <label className="text-[10px] font-bold text-slate-500 block mb-1">Edad</label>
@@ -104,7 +102,6 @@ export const MobileElegibilidadModal: React.FC<MobileElegibilidadModalProps> = (
             </div>
           </div>
 
-          {/* Nivel de entrenamiento */}
           <div>
             <label className="text-[10px] font-bold text-slate-500 block mb-1">
               Nivel de entrenamiento
@@ -135,7 +132,6 @@ export const MobileElegibilidadModal: React.FC<MobileElegibilidadModalProps> = (
             </div>
           </div>
 
-          {/* Cuestionario de exclusión médica */}
           <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2.5">
             <span className="font-bold text-slate-800 block text-[11px]">
               ¿Tienes alguna de estas condiciones?
@@ -172,7 +168,6 @@ export const MobileElegibilidadModal: React.FC<MobileElegibilidadModalProps> = (
             </label>
           </div>
 
-          {/* Advertencia de canalización */}
           {tieneCondicionExcluyente ? (
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-[11px] leading-relaxed flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
@@ -186,7 +181,6 @@ export const MobileElegibilidadModal: React.FC<MobileElegibilidadModalProps> = (
             </p>
           )}
 
-          {/* Consentimiento LFPDPPP */}
           <div className="pt-2 border-t border-slate-100">
             <label className="flex items-start gap-2 cursor-pointer text-[10px] text-slate-600 leading-tight">
               <input
@@ -202,7 +196,6 @@ export const MobileElegibilidadModal: React.FC<MobileElegibilidadModalProps> = (
             </label>
           </div>
 
-          {/* Botón Continuar (Figura 2) */}
           <button
             type="submit"
             className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-all text-xs"

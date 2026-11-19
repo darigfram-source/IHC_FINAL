@@ -17,7 +17,6 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Cerrar al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -30,7 +29,6 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [open]);
 
-  // Cerrar con Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && open) {
@@ -41,7 +39,6 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open]);
 
-  // VARIANTE: SEGMENTED (Para la vista de Menú > Ajustes)
   if (variant === 'segmented') {
     const options: { value: Theme; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
       { value: 'light', label: 'Claro', icon: Sun },
@@ -79,7 +76,6 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
     );
   }
 
-  // VARIANTE: COMPACT (Botón con menú desplegable para el Header)
   const currentIcon =
     theme === 'system' ? (
       <Laptop className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />

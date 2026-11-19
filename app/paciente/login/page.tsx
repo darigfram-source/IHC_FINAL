@@ -82,7 +82,6 @@ export default function PacienteLoginPage() {
           Volver al portal principal
         </Link>
 
-        {/* Header App Paciente */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-950/50">
             <Dumbbell className="w-6 h-6" />
@@ -155,7 +154,6 @@ export default function PacienteLoginPage() {
           </button>
         </form>
 
-        {/* Demo Fast Access Buttons */}
         <div className="mt-6 pt-5 border-t border-slate-800">
           <p className="text-[11px] font-semibold text-slate-400 mb-2.5 flex items-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -181,7 +179,6 @@ export default function PacienteLoginPage() {
           </div>
         </div>
 
-        {/* Registro Link */}
         <div className="mt-5 text-center">
           <p className="text-xs text-slate-400">
             ¿Aún no estás registrado?{' '}

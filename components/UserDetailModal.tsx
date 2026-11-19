@@ -37,7 +37,6 @@ export const UserDetailModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Header */}
         <div className="p-5 border-b border-slate-200 bg-gradient-to-r from-[#0a1a14] to-slate-900 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-emerald-600/30 text-emerald-400 flex items-center justify-center font-bold text-base border border-emerald-500/30">
@@ -90,7 +89,6 @@ export const UserDetailModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Modal Tabs */}
         <div className="px-5 border-b border-slate-200 bg-slate-50 flex items-center gap-4 text-xs font-semibold text-slate-600 shrink-0">
           <button
             onClick={() => setActiveTabLocal('graficas')}
@@ -141,13 +139,11 @@ export const UserDetailModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Modal Tab Content */}
         <div className="p-6 overflow-y-auto flex-1">
           {activeTab === 'graficas' && <EvolutionCharts usuario={selectedUsuario} />}
 
           {activeTab === 'requerimientos' && (
             <div className="space-y-5 text-xs text-slate-700">
-              {/* Marco explicativo */}
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
                 <h4 className="font-bold text-sm text-emerald-900 mb-1">
                   Motor de Reglas y Fórmulas Nutricionales
@@ -157,7 +153,6 @@ export const UserDetailModal: React.FC = () => {
                 </p>
               </div>
 
-              {/* Fórmulas y valores calculados */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-center gap-2">
@@ -191,7 +186,6 @@ export const UserDetailModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Distribución de macros */}
               <div className="border border-slate-200 rounded-xl p-4 bg-slate-50">
                 <h5 className="font-bold text-slate-800 mb-3">Distribución de Macronutrientes y Suplementación</h5>
                 <div className="grid grid-cols-3 gap-3 text-center">
@@ -289,7 +283,6 @@ export const UserDetailModal: React.FC = () => {
           )}
         </div>
 
-        {/* Footer */}
         <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
           <button
             onClick={() => setIsDetailModalOpen(false)}

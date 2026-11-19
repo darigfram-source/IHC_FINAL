@@ -12,7 +12,6 @@ export const ConsentModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
-        {/* Header */}
         <div className="p-5 border-b border-slate-200 bg-slate-900 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <ShieldCheck className="w-5 h-5 text-emerald-400" />
@@ -33,7 +32,6 @@ export const ConsentModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-700">
           <div className="bg-emerald-50 border border-emerald-200 p-3.5 rounded-xl text-emerald-950 font-medium">
             <strong>Tratamiento de Datos Personales de Salud (Requerimientos 12–14):</strong><br />
@@ -77,7 +75,6 @@ export const ConsentModal: React.FC = () => {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
           <button
             onClick={() => setIsLegalModalOpen(false)}

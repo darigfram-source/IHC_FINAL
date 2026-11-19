@@ -18,22 +18,16 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-slate-100 select-none">
-      {/* Barra Lateral Izquierda (Panel con Usuarios, Mensajes, Reportes, Biblioteca) */}
       <Sidebar />
 
-      {/* Contenido Principal de Escritorio */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Barra Superior con KPIs */}
         <Header />
 
-        {/* Área de Trabajo según Pestaña Activa */}
         <main className="flex-1 p-6 overflow-hidden flex flex-col">
           {activeTab === 'usuarios' && (
             <div className="flex-1 flex gap-6 overflow-hidden">
-              {/* Sección Central: Tabla "Mis usuarios" */}
               <UserTable />
 
-              {/* Columna Derecha: Tarjeta de Inspección Rápida (Figura 8) */}
               <UserInspector />
             </div>
           )}
@@ -46,7 +40,6 @@ export default function AdminDashboardPage() {
         </main>
       </div>
 
-      {/* Modales y Paneles Flotantes */}
       <UserDetailModal />
       <AdjustPlanModal />
       <ConsentModal />

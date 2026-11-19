@@ -22,9 +22,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 1. Rutas protegidas de ADMINISTRADOR (Nutriólogo)
   if (pathname.startsWith('/admin')) {
-    // Permitir acceso a la pantalla de login del admin
     if (pathname === '/admin/login') {
       if (session && session.rol === 'admin') {
         return NextResponse.redirect(new URL('/admin', request.url));
@@ -32,7 +30,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Proteger resto de rutas /admin/*
     if (!session || session.rol !== 'admin') {
       const loginUrl = new URL('/admin/login', request.url);
       loginUrl.searchParams.set('from', pathname);
@@ -40,9 +37,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // 2. Rutas protegidas de PACIENTE (Cliente Web Móvil)
   if (pathname.startsWith('/paciente')) {
-    // Permitir acceso a login y registro de pacientes
     if (pathname === '/paciente/login' || pathname === '/paciente/registro') {
       if (session && session.rol === 'paciente') {
         return NextResponse.redirect(new URL('/paciente/dashboard', request.url));
@@ -50,7 +45,6 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Proteger dashboard, diario, gráficas, chat y menú del paciente
     if (!session || session.rol !== 'paciente') {
       const loginUrl = new URL('/paciente/login', request.url);
       loginUrl.searchParams.set('from', pathname);

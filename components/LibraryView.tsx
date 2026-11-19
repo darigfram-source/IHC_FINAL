@@ -24,7 +24,6 @@ export const LibraryView: React.FC = () => {
   const [selectedArticle, setSelectedArticle] = useState<ArticuloEducativo | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // Formulario nuevo artículo
   const [nuevoTitulo, setNuevoTitulo] = useState('');
   const [nuevaCategoria, setNuevaCategoria] = useState<ArticuloEducativo['categoria']>('Proteína & Salud Renal');
   const [nuevoResumen, setNuevoResumen] = useState('');
@@ -68,7 +67,6 @@ export const LibraryView: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden h-[calc(100vh-6.5rem)]">
-      {/* Header */}
       <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2">
@@ -91,7 +89,6 @@ export const LibraryView: React.FC = () => {
         </button>
       </div>
 
-      {/* Filtros por Categoría */}
       <div className="px-4 py-2.5 bg-white border-b border-slate-100 flex items-center gap-2 overflow-x-auto text-xs">
         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 shrink-0">
           Filtrar:
@@ -111,7 +108,6 @@ export const LibraryView: React.FC = () => {
         ))}
       </div>
 
-      {/* Grid de Artículos */}
       <div className="flex-1 p-5 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredArticles.map((art) => (
           <div
@@ -130,7 +126,6 @@ export const LibraryView: React.FC = () => {
                     {art.tiempo_lectura_min} min
                   </span>
 
-                  {/* Toggle para mostrar/ocultar en la app móvil */}
                   <button
                     onClick={() => toggleArticuloVisibility(art.id)}
                     title={art.visible_en_app ? 'Visible en app móvil (clic para ocultar)' : 'Oculto en app móvil (clic para mostrar)'}
@@ -178,7 +173,6 @@ export const LibraryView: React.FC = () => {
         ))}
       </div>
 
-      {/* Modal: Lector de Artículo Completo */}
       {selectedArticle && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 overflow-hidden max-h-[85vh] flex flex-col">
@@ -231,7 +225,6 @@ export const LibraryView: React.FC = () => {
         </div>
       )}
 
-      {/* Modal: Crear Nueva Guía */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full border border-slate-200 overflow-hidden">

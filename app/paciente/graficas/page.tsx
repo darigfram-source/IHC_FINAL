@@ -41,7 +41,6 @@ export default function PacienteGraficasPage() {
           if (json.data.registros && json.data.registros.length > 0) {
             setRegistros(json.data.registros);
           } else {
-            // Datos iniciales de demostración si aún no hay registros
             setRegistros([
               { id: '1', fecha: '2026-10-10', peso_ayunas: 77.2, sentadilla_kg: 95, press_banca_kg: 65, volumen_entrenamiento_kg: 11000 },
               { id: '2', fecha: '2026-10-17', peso_ayunas: 77.6, sentadilla_kg: 97.5, press_banca_kg: 67.5, volumen_entrenamiento_kg: 11600 },
@@ -62,7 +61,6 @@ export default function PacienteGraficasPage() {
     fetchHistory();
   }, []);
 
-  // Calcular puntos para SVG (ViewBox 600x260 adaptable)
   const dataList = registros.slice(-7);
   const svgWidth = 600;
   const svgHeight = 240;
@@ -103,7 +101,6 @@ export default function PacienteGraficasPage() {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Selector de Métrica Adaptable (Segmented Control) */}
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div
             role="tablist"
@@ -167,13 +164,7 @@ export default function PacienteGraficasPage() {
           </div>
         </div>
 
-        {/* ====================================================================
-            LAYOUT GRID RESPONSIVO: GRÁFICA PRINCIPAL + TABLA DE HISTORIAL
-            ==================================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* ================================================================
-              GRÁFICA INTERACTIVA ADAPTABLE (lg:col-span-8)
-              ================================================================ */}
           <div className="lg:col-span-8 space-y-6">
             <article
               aria-label="Gráfica de evolución temporal"
@@ -205,18 +196,15 @@ export default function PacienteGraficasPage() {
                 )}
               </div>
 
-              {/* LIENZO SVG ADAPTABLE FLUIDO (ViewBox 600x240) */}
               <div className="w-full bg-[var(--surface-raised)] rounded-2xl p-4 sm:p-6 border border-[var(--border-subtle)]">
                 <svg
                   viewBox={`0 0 ${svgWidth} ${svgHeight}`}
                   className="w-full h-56 sm:h-72 overflow-visible"
                 >
-                  {/* Líneas de rejilla adaptadas a modo claro y oscuro */}
                   <line x1="30" y1="30" x2={svgWidth - 30} y2="30" stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeDasharray="4 4" strokeWidth="1" />
                   <line x1="30" y1="120" x2={svgWidth - 30} y2="120" stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeDasharray="4 4" strokeWidth="1" />
                   <line x1="30" y1="210" x2={svgWidth - 30} y2="210" stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeDasharray="4 4" strokeWidth="1" />
 
-                  {/* TAB: PESO */}
                   {tab === 'peso' && (
                     <>
                       <polyline
@@ -250,7 +238,6 @@ export default function PacienteGraficasPage() {
                     </>
                   )}
 
-                  {/* TAB: CARGAS */}
                   {tab === 'cargas' && (
                     <>
                       <polyline
@@ -284,7 +271,6 @@ export default function PacienteGraficasPage() {
                     </>
                   )}
 
-                  {/* TAB: VOLUMEN */}
                   {tab === 'volumen' && (
                     <>
                       <polyline
@@ -304,7 +290,6 @@ export default function PacienteGraficasPage() {
                   )}
                 </svg>
 
-                {/* Fechas en el eje horizontal */}
                 <div className="flex justify-between text-xs text-[var(--text-subtle)] px-4 mt-3">
                   <span>{dataList[0]?.fecha || 'Semana 1'}</span>
                   <span>{dataList[Math.floor(dataList.length / 2)]?.fecha || 'Semana 2'}</span>
@@ -312,7 +297,6 @@ export default function PacienteGraficasPage() {
                 </div>
               </div>
 
-              {/* Criterio Científico WCAG AA */}
               <div className="p-4 rounded-2xl bg-[var(--primary-surface)] border border-[var(--primary-border)] text-[var(--primary-text)] flex items-start gap-3 text-xs leading-relaxed">
                 <Info className="w-5 h-5 shrink-0 mt-0.5 text-[var(--primary)]" />
                 <p>
@@ -322,9 +306,6 @@ export default function PacienteGraficasPage() {
             </article>
           </div>
 
-          {/* ================================================================
-              TABLA DE HISTORIAL DE MEDICIONES (lg:col-span-4)
-              ================================================================ */}
           <div className="lg:col-span-4 space-y-6">
             <article
               aria-label="Historial de mediciones recientes"

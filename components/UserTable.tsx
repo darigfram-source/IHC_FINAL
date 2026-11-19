@@ -30,7 +30,6 @@ export const UserTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState<'Todos' | 'En progreso' | 'Estancado' | 'Alerta'>('Todos');
 
-  // Filtrado de usuarios
   const filteredUsers = usuarios.filter((user) => {
     const matchesSearch =
       user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -99,7 +98,6 @@ export const UserTable: React.FC = () => {
 
   return (
     <div className="flex-1 flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-      {/* Table Header Controls */}
       <div className="p-4 border-b border-slate-200 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold text-slate-900 tracking-tight">Mis usuarios</h2>
@@ -108,7 +106,6 @@ export const UserTable: React.FC = () => {
           </p>
         </div>
 
-        {/* Buscador y Filtros */}
         <div className="flex items-center gap-3">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -139,7 +136,6 @@ export const UserTable: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Table (Matches Figure 8 layout) */}
       <div className="flex-1 overflow-x-auto overflow-y-auto">
         <table className="w-full text-left border-collapse">
           <thead>
@@ -171,7 +167,6 @@ export const UserTable: React.FC = () => {
                         : 'hover:bg-slate-50'
                     }`}
                   >
-                    {/* Usuario */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
                         <div
@@ -196,7 +191,6 @@ export const UserTable: React.FC = () => {
                       </div>
                     </td>
 
-                    {/* Peso */}
                     <td className="py-3.5 px-4 font-semibold text-slate-800">
                       <span>{user.peso_actual.toFixed(1)} kg</span>
                       <span className="text-[11px] text-slate-400 font-normal ml-1">
@@ -204,17 +198,14 @@ export const UserTable: React.FC = () => {
                       </span>
                     </td>
 
-                    {/* Cargas */}
                     <td className="py-3.5 px-4">
                       {getCargasIndicator(user.tendencia_cargas)}
                     </td>
 
-                    {/* Estado */}
                     <td className="py-3.5 px-4">
                       {getEstadoBadge(user.estado)}
                     </td>
 
-                    {/* Acciones */}
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5 opacity-90 group-hover:opacity-100">
                         <button
@@ -260,7 +251,6 @@ export const UserTable: React.FC = () => {
         </table>
       </div>
 
-      {/* Footer bar */}
       <div className="p-3 bg-slate-50 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
         <div>
           Mostrando <span className="font-semibold text-slate-700">{filteredUsers.length}</span> de{' '}

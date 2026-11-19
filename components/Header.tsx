@@ -51,13 +51,11 @@ export const Header: React.FC = () => {
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 select-none">
-      {/* Título de sección */}
       <div>
         <h1 className="text-base font-extrabold text-slate-900 tracking-tight">{title}</h1>
         <p className="text-xs text-slate-500 hidden sm:block">{subtitle}</p>
       </div>
 
-      {/* Métricas Rápidas (KPIs para el Especialista) y Switcher de rol */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs">
           <span className="text-slate-500 font-medium">Pacientes:</span>
@@ -74,13 +72,11 @@ export const Header: React.FC = () => {
           </span>
         </div>
 
-        {/* Especialidad clínica */}
         <div className="hidden lg:flex items-center gap-2 bg-emerald-50 text-emerald-900 border border-emerald-200/80 px-3 py-1.5 rounded-lg text-xs font-semibold">
           <Award className="w-3.5 h-3.5 text-emerald-700" />
           <span>Nutrición Deportiva e Hipertrofia</span>
         </div>
 
-        {/* Botón Cerrar Sesión */}
         <button
           onClick={logout}
           title="Cerrar sesión de especialista"
@@ -89,7 +85,6 @@ export const Header: React.FC = () => {
           <LogOut className="w-3.5 h-3.5" />
           <span className="hidden sm:inline">Cerrar Sesión</span>
         </button>
-
 
       </div>
     </header>

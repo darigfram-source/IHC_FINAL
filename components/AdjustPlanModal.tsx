@@ -86,7 +86,6 @@ export const AdjustPlanModal: React.FC = () => {
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-xl w-full border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        {/* Header */}
         <div className="p-5 border-b border-slate-200 bg-gradient-to-r from-emerald-950 to-slate-900 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-emerald-600/30 rounded-xl border border-emerald-400/30">
@@ -109,9 +108,7 @@ export const AdjustPlanModal: React.FC = () => {
           </button>
         </div>
 
-        {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5 text-sm max-h-[80vh] overflow-y-auto">
-          {/* Fundamento científico visible */}
           <div className="bg-emerald-50 border border-emerald-200/80 rounded-xl p-3.5 flex items-start gap-3">
             <BookOpen className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
             <div className="text-xs text-emerald-950">
@@ -122,7 +119,6 @@ export const AdjustPlanModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Control 1: Superávit Calórico */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
@@ -144,7 +140,6 @@ export const AdjustPlanModal: React.FC = () => {
               className="w-full accent-emerald-600 cursor-pointer"
             />
 
-            {/* Presets rápidos */}
             <div className="flex items-center gap-2 pt-1">
               <span className="text-[11px] text-slate-400">Preajustes:</span>
               {[350, 400, 450, 500].map((preset) => (
@@ -164,7 +159,6 @@ export const AdjustPlanModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Control 2: Proteína en g/kg */}
           <div className="space-y-2 pt-2 border-t border-slate-100">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
@@ -187,7 +181,6 @@ export const AdjustPlanModal: React.FC = () => {
               className="w-full accent-emerald-600 cursor-pointer"
             />
 
-            {/* Alerta de exceso de proteína (> 2.0 g/kg) */}
             {isProteinaExcesiva && (
               <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 flex items-start gap-2.5 text-xs text-rose-900 animate-in fade-in">
                 <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
@@ -201,7 +194,6 @@ export const AdjustPlanModal: React.FC = () => {
             )}
           </div>
 
-          {/* Control 3: Carbohidratos Peri-Entrenamiento y Grasas */}
           <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100">
             <div>
               <label className="text-xs font-bold text-slate-700 block mb-1">
@@ -237,7 +229,6 @@ export const AdjustPlanModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Resumen del nuevo balance metabólico */}
           <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
             <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">
               Nueva Distribución Diaria Estimada
@@ -262,7 +253,6 @@ export const AdjustPlanModal: React.FC = () => {
             </div>
           </div>
 
-          {/* Motivo clínico */}
           <div>
             <label className="text-xs font-bold text-slate-700 block mb-1">
               Justificación Clínica del Reajuste (se notificará al paciente en su chat)
@@ -277,7 +267,6 @@ export const AdjustPlanModal: React.FC = () => {
             />
           </div>
 
-          {/* Botones de acción */}
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-200">
             <button
               type="button"

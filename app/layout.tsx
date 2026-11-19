@@ -44,7 +44,6 @@ export const viewport: Viewport = {
   ],
 };
 
-// Script inline para evitar parpadeo de tema (FOUC)
 const themeScript = `
   (function() {
     try {

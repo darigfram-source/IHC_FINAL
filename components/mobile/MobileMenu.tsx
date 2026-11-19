@@ -38,7 +38,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onOpenElegibilidad }) =>
 
   if (!activePatient) return null;
 
-  // Filtrar solo artículos marcados como visibles en la app
   const visibleArticles = articulos.filter((a) => a.visible_en_app);
   const patientReports = reportes.filter((r) => r.usuario_id === activePatient.id);
 
@@ -77,7 +76,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onOpenElegibilidad }) =>
           ))}
         </div>
 
-        {/* Modal de lectura de artículo */}
         {selectedArticulo && (
           <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
             <div className="bg-white rounded-3xl max-w-sm w-full p-5 shadow-2xl max-h-[85vh] overflow-y-auto">
@@ -157,10 +155,8 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onOpenElegibilidad }) =>
 
   return (
     <div className="p-4 space-y-4 text-slate-800">
-      {/* Encabezado (Figura 7: "Menú") */}
       <h2 className="text-xl font-black text-slate-900 tracking-tight">Menú</h2>
 
-      {/* Tarjeta de Usuario Activo */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex items-center gap-3">
         <div className="w-11 h-11 rounded-full bg-emerald-600 text-white flex items-center justify-center font-black text-sm">
           {activePatient.nombre.substring(0, 2).toUpperCase()}
@@ -173,9 +169,7 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onOpenElegibilidad }) =>
         </div>
       </div>
 
-      {/* Lista de Opciones del Menú (Fiel a la Figura 7 del PDF) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden divide-y divide-slate-100 text-xs font-semibold">
-        {/* 1. Mi perfil y datos */}
         <button
           onClick={onOpenElegibilidad}
           className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors text-left"
@@ -187,7 +181,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onOpenElegibilidad }) =>
           <ChevronRight className="w-4 h-4 text-slate-400" />
         </button>
 
-        {/* 2. Metas */}
         <div className="p-3.5 flex items-center justify-between text-slate-700">
           <div className="flex items-center gap-3">
             <Target className="w-4 h-4 text-slate-400" />
@@ -198,7 +191,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onOpenElegibilidad }) =>
           </span>
         </div>
 
-        {/* 3. Biblioteca educativa */}
         <button
           onClick={() => setSubView('biblioteca')}
           className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors text-left"
@@ -215,7 +207,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onOpenElegibilidad }) =>
           </div>
         </button>
 
-        {/* 4. Reportes y resúmenes */}
         <button
           onClick={() => setSubView('reportes')}
           className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors text-left"
@@ -227,7 +218,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onOpenElegibilidad }) =>
           <ChevronRight className="w-4 h-4 text-slate-400" />
         </button>
 
-        {/* 5. Recordatorios */}
         <div className="p-3.5 flex items-center justify-between text-slate-700">
           <div className="flex items-center gap-3">
             <Bell className="w-4 h-4 text-slate-400" />
@@ -238,7 +228,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onOpenElegibilidad }) =>
           </span>
         </div>
 
-        {/* 6. Aviso de privacidad y mis derechos */}
         <button
           onClick={() => setIsLegalModalOpen(true)}
           className="w-full p-3.5 flex items-center justify-between hover:bg-slate-50 transition-colors text-left"
@@ -251,7 +240,6 @@ export const MobileMenu: React.FC<MobileMenuProps> = ({ onOpenElegibilidad }) =>
         </button>
       </div>
 
-      {/* Switcher al Panel de Nutriólogo */}
       <Link
         href="/"
         className="w-full p-3.5 bg-slate-900 text-white rounded-2xl flex items-center justify-between font-bold text-xs shadow-md hover:bg-black transition-all"

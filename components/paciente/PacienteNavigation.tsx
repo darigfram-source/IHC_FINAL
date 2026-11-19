@@ -40,15 +40,11 @@ export const PacienteNavigation: React.FC = () => {
 
   return (
     <>
-      {/* ====================================================================
-          1. ESCRITORIO (>1024px / lg:flex) - BARRA LATERAL COMPLETA EXPANDIDA
-          ==================================================================== */}
       <aside
         aria-label="Navegación principal de escritorio"
         className="hidden lg:flex flex-col justify-between w-64 shrink-0 h-screen sticky top-0 bg-[var(--surface)] border-r border-[var(--border)] p-5 select-none z-30"
       >
         <div className="space-y-6">
-          {/* Logo e Identidad de Marca */}
           <Link
             href="/paciente/dashboard"
             className="flex items-center gap-3 group focus-visible:outline-2 focus-visible:outline-emerald-500 rounded-xl"
@@ -71,7 +67,6 @@ export const PacienteNavigation: React.FC = () => {
             </div>
           </Link>
 
-          {/* Enlaces de Navegación */}
           <nav className="space-y-1.5" aria-label="Menú de escritorio">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
@@ -105,7 +100,6 @@ export const PacienteNavigation: React.FC = () => {
           </nav>
         </div>
 
-        {/* Footer Barra Lateral: Ajustes de Tema y Salir */}
         <div className="pt-4 border-t border-[var(--border)] space-y-3">
           <div className="flex items-center justify-between px-1">
             <span className="text-xs font-semibold text-[var(--text-muted)]">Tema</span>
@@ -122,15 +116,11 @@ export const PacienteNavigation: React.FC = () => {
         </div>
       </aside>
 
-      {/* ====================================================================
-          2. TABLET (640px–1024px / md:flex lg:hidden) - BARRA LATERAL COMPACTA
-          ==================================================================== */}
       <aside
         aria-label="Navegación compacta de tablet"
         className="hidden md:flex lg:hidden flex-col justify-between w-20 shrink-0 h-screen sticky top-0 bg-[var(--surface)] border-r border-[var(--border)] py-5 px-2.5 select-none z-30 items-center"
       >
         <div className="space-y-6 flex flex-col items-center w-full">
-          {/* Logo Compacto */}
           <Link
             href="/paciente/dashboard"
             aria-label="Ir al inicio de NutriMasa"
@@ -139,7 +129,6 @@ export const PacienteNavigation: React.FC = () => {
             <Dumbbell className="w-6 h-6" />
           </Link>
 
-          {/* Íconos de Navegación */}
           <nav className="space-y-2 w-full flex flex-col items-center" aria-label="Menú compacto">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon;
@@ -166,7 +155,6 @@ export const PacienteNavigation: React.FC = () => {
           </nav>
         </div>
 
-        {/* Footer Tablet: Selector de tema y Salir */}
         <div className="flex flex-col items-center gap-2 pt-4 border-t border-[var(--border)] w-full">
           <ThemeToggle variant="compact" />
 
@@ -181,9 +169,6 @@ export const PacienteNavigation: React.FC = () => {
         </div>
       </aside>
 
-      {/* ====================================================================
-          3. MÓVIL (<640px / md:hidden) - BARRA DE NAVEGACIÓN INFERIOR
-          ==================================================================== */}
       <nav
         aria-label="Navegación móvil inferior"
         className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-[var(--surface)] border-t border-[var(--border)] flex items-center justify-around px-2 z-40 select-none shadow-lg pb-[env(safe-area-inset-bottom,0px)]"
@@ -222,7 +207,6 @@ export const PacienteTopBar: React.FC<{
   return (
     <header className="h-16 px-4 sm:px-6 lg:px-8 border-b border-[var(--border)] bg-[var(--surface)] flex items-center justify-between shrink-0 sticky top-0 z-20 backdrop-blur-md bg-opacity-90 dark:bg-opacity-90">
       <div className="flex items-center gap-3">
-        {/* Logo visible en móvil */}
         <div className="md:hidden w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-sm shrink-0">
           <Dumbbell className="w-5 h-5" />
         </div>

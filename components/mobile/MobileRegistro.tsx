@@ -76,7 +76,6 @@ export const MobileRegistro: React.FC<MobileRegistroProps> = ({ onSuccess }) => 
 
   return (
     <div className="p-4 space-y-4 text-slate-800">
-      {/* Encabezado (Figura 4: "Registro de hoy - Se completa en menos de 30 segundos") */}
       <div className="border-b border-slate-200 pb-3">
         <h2 className="text-xl font-black text-slate-900 tracking-tight">Registro de hoy</h2>
         <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-semibold mt-0.5">
@@ -86,7 +85,6 @@ export const MobileRegistro: React.FC<MobileRegistroProps> = ({ onSuccess }) => 
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-        {/* Campo 1: Peso en ayunas (kg) con referencia del último registro */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
@@ -108,7 +106,6 @@ export const MobileRegistro: React.FC<MobileRegistroProps> = ({ onSuccess }) => 
           />
         </div>
 
-        {/* Campo 2: Volumen de entrenamiento (kg totales) */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
@@ -127,7 +124,6 @@ export const MobileRegistro: React.FC<MobileRegistroProps> = ({ onSuccess }) => 
           />
         </div>
 
-        {/* Campo 3: Progresión de cargas (kg) - Sentadilla y Press de banca (Figura 4) */}
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
           <label className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
             <Dumbbell className="w-4 h-4 text-blue-600" />
@@ -167,7 +163,6 @@ export const MobileRegistro: React.FC<MobileRegistroProps> = ({ onSuccess }) => 
           </div>
         </div>
 
-        {/* Campo 4: Proteína diaria estimada */}
         <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
@@ -196,13 +191,11 @@ export const MobileRegistro: React.FC<MobileRegistroProps> = ({ onSuccess }) => 
           )}
         </div>
 
-        {/* Aviso de sincronización offline (Figura 4: "Sin conexión tu registro se guarda y se sincroniza después") */}
         <div className="p-3 bg-slate-100/90 rounded-xl border border-slate-200 flex items-center gap-2 text-[11px] text-slate-500">
           <WifiOff className="w-4 h-4 text-slate-400 shrink-0" />
           <span>Sin conexión tu registro se guarda y se sincroniza después.</span>
         </div>
 
-        {/* Botón Guardar Registro (Figura 4: [Guardar registro]) */}
         <button
           type="submit"
           disabled={guardadoExitoso}

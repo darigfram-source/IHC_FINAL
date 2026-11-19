@@ -66,7 +66,6 @@ export const ReportsView: React.FC = () => {
 
   return (
     <div className="flex-1 flex gap-5 overflow-hidden">
-      {/* Columna Izquierda: Configuración del Reporte */}
       <div className="w-80 bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col shrink-0 overflow-y-auto print:hidden">
         <div className="border-b border-slate-200 pb-3 mb-4">
           <div className="flex items-center gap-2">
@@ -78,7 +77,6 @@ export const ReportsView: React.FC = () => {
           </p>
         </div>
 
-        {/* Selector de Paciente */}
         <div className="space-y-3 text-xs">
           <div>
             <label className="font-bold text-slate-700 block mb-1">Paciente asignado</label>
@@ -162,7 +160,6 @@ export const ReportsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Historial de reportes emitidos */}
         <div className="mt-6 pt-4 border-t border-slate-200">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
             Reportes emitidos ({userReports.length})
@@ -185,9 +182,7 @@ export const ReportsView: React.FC = () => {
         </div>
       </div>
 
-      {/* Columna Derecha: Vista Previa Imprimible (A4 / Hoja membretada oficial) */}
       <div className="flex-1 bg-white border border-slate-200 rounded-xl shadow-sm overflow-y-auto p-8 text-slate-900 print:border-none print:shadow-none print:p-0">
-        {/* Encabezado Institucional */}
         <div className="border-b-2 border-emerald-700 pb-5 mb-6 flex items-start justify-between">
           <div>
             <div className="flex items-center gap-2">
@@ -214,7 +209,6 @@ export const ReportsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Ficha del Paciente */}
         <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 mb-6">
           <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
             Datos Generales del Paciente
@@ -241,7 +235,6 @@ export const ReportsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Métricas Clave de Evolución */}
         <div className="grid grid-cols-4 gap-3 mb-6">
           <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-3.5 text-center">
             <span className="text-[10px] text-emerald-800 font-bold uppercase block">
@@ -281,7 +274,6 @@ export const ReportsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Prescripción Nutricional Basada en Evidencia */}
         <div className="border border-slate-200 rounded-xl p-4 mb-6 bg-white">
           <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
             Pauta Dietética para Hipertrofia (Morton et al. 2018, Urdampilleta 2012)
@@ -326,7 +318,6 @@ export const ReportsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Conclusiones Clínicas */}
         <div className="space-y-4 text-xs">
           <div>
             <h5 className="font-bold text-slate-800 mb-1">Evaluación del Especialista:</h5>
@@ -343,7 +334,6 @@ export const ReportsView: React.FC = () => {
           </div>
         </div>
 
-        {/* Firma del Nutriólogo */}
         <div className="mt-12 pt-6 border-t border-slate-300 flex items-center justify-between">
           <div className="text-[10px] text-slate-400">
             Documento emitido mediante la plataforma de interacción médico-deportiva NutriMasa.<br />

@@ -54,7 +54,6 @@ export default function PacienteRegistroPage() {
     e.preventDefault();
     setError('');
 
-    // Validación de criterios de exclusión de salud del estudio (Fig. 2)
     if (!formData.sin_enfermedad_renal) {
       setError('Por seguridad médica, el protocolo con superávit e hipertrofia no admite antecedentes renales o hepáticos no controlados.');
       return;
@@ -108,7 +107,6 @@ export default function PacienteRegistroPage() {
         return;
       }
 
-      // Redirigir directamente al dashboard del paciente
       router.push('/paciente/dashboard');
       router.refresh();
     } catch (err) {
@@ -128,7 +126,6 @@ export default function PacienteRegistroPage() {
           Volver a iniciar sesión
         </Link>
 
-        {/* Encabezado */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white shadow-lg shadow-emerald-950/50 shrink-0">
             <Dumbbell className="w-6 h-6" />
@@ -157,7 +154,6 @@ export default function PacienteRegistroPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Sección 1: Datos de Cuenta */}
           <div className="space-y-3">
             <h2 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
               <User className="w-3.5 h-3.5" />
@@ -205,7 +201,6 @@ export default function PacienteRegistroPage() {
             </div>
           </div>
 
-          {/* Sección 2: Antropometría y Experiencia */}
           <div className="space-y-3 pt-3 border-t border-slate-800">
             <h2 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
               <Scale className="w-3.5 h-3.5" />
@@ -291,7 +286,6 @@ export default function PacienteRegistroPage() {
             </div>
           </div>
 
-          {/* Sección 3: Criterios de Exclusión Médica (Figura 2) */}
           <div className="space-y-3 pt-3 border-t border-slate-800">
             <h2 className="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5" />

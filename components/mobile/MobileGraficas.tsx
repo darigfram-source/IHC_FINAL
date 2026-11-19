@@ -30,7 +30,6 @@ export const MobileGraficas: React.FC = () => {
 
   return (
     <div className="p-4 space-y-4 text-slate-800">
-      {/* Encabezado (Figura 5: "Tu progreso" [Peso] [Volumen] [Cargas]) */}
       <div className="space-y-3">
         <h2 className="text-xl font-black text-slate-900 tracking-tight">Tu progreso</h2>
 
@@ -68,7 +67,6 @@ export const MobileGraficas: React.FC = () => {
         </div>
       </div>
 
-      {/* Gráfica Seleccionada */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-extrabold text-slate-800">
@@ -83,7 +81,6 @@ export const MobileGraficas: React.FC = () => {
           </span>
         </div>
 
-        {/* Gráfica SVG */}
         {metricTab === 'peso' && (
           <div className="pt-2">
             <WeightChart
@@ -134,7 +131,6 @@ export const MobileGraficas: React.FC = () => {
         )}
       </div>
 
-      {/* Meta y Plan (Figura 5: "Meta: 80 kg", "Tu plan de hoy...") */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-2.5 text-xs">
         <div className="flex items-center justify-between font-bold">
           <span className="text-slate-700">Meta: {activePatient.peso_objetivo} kg</span>
@@ -154,7 +150,6 @@ export const MobileGraficas: React.FC = () => {
         </div>
       </div>
 
-      {/* Aviso Educativo sobre Exceso de Proteína (Figura 5 text) */}
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-xs text-amber-950 space-y-1.5 shadow-2xs">
         <div className="flex items-start gap-2">
           <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />

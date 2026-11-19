@@ -31,7 +31,6 @@ export async function POST(request: Request) {
     const userId = `usr-${Date.now()}`;
     const pwdHash = await hashPassword(password);
 
-    // Calcular valores iniciales de hipertrofia (Morton 2018, Urdampilleta 2012)
     const proteina_g_kg = 1.75;
     const superavit_kcal = 450;
     const calorias_mantenimiento = Math.round(Number(peso_actual) * 32);
@@ -44,7 +43,6 @@ export async function POST(request: Request) {
 
     if (hasDbConnection()) {
       try {
-        // Verificar existencia
         const existing = await query('SELECT id FROM usuarios WHERE LOWER(email) = $1', [cleanEmail]);
         if (existing && existing.length > 0) {
           return NextResponse.json(
@@ -53,13 +51,11 @@ export async function POST(request: Request) {
           );
         }
 
-        // Insertar usuario
         await query(
           'INSERT INTO usuarios (id, email, password_hash, rol, nombre) VALUES ($1, $2, $3, $4, $5)',
           [userId, cleanEmail, pwdHash, 'paciente', nombre]
         );
 
-        // Insertar perfil de paciente
         await query(
           `INSERT INTO perfiles_paciente (
             usuario_id, nutriologo_id, edad, estatura_cm, peso_inicial, peso_actual, peso_objetivo,
@@ -100,7 +96,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // Crear sesión
     const token = await createSessionToken({
       userId,
       email: cleanEmail,

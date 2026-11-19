@@ -29,7 +29,6 @@ export const MobileChat: React.FC = () => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8.5rem)] text-slate-800">
-      {/* Encabezado (Figura 6: "Tu nutriólogo") */}
       <div className="p-3.5 bg-white border-b border-slate-200 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-xs">
@@ -46,7 +45,6 @@ export const MobileChat: React.FC = () => {
         </div>
       </div>
 
-      {/* AVISO FIJO OBLIGATORIO (Fiel a Figura 6: "Este chat no es en tiempo real y no sirve para urgencias...") */}
       <div className="bg-amber-50 border-b border-amber-200 px-3.5 py-2.5 flex items-center gap-2 text-xs text-amber-900 shrink-0">
         <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
         <p className="text-[11px] font-medium leading-tight">
@@ -54,7 +52,6 @@ export const MobileChat: React.FC = () => {
         </p>
       </div>
 
-      {/* Lista de Mensajes */}
       <div className="flex-1 p-4 overflow-y-auto space-y-3 bg-slate-100/60">
         {chatMessages.length === 0 ? (
           <div className="text-center py-10 text-slate-400 text-xs">
@@ -103,7 +100,6 @@ export const MobileChat: React.FC = () => {
         )}
       </div>
 
-      {/* Barra de Entrada (Figura 6: "Escribe tu mensaje" [Enviar]) */}
       <form
         onSubmit={handleSend}
         className="p-3 bg-white border-t border-slate-200 flex items-center gap-2 shrink-0"

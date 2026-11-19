@@ -1,8 +1,3 @@
-// ============================================================================
-// AUTENTICACIÓN Y SESIONES SEGURAS: NUTRIMASA
-// Manejo de JWT con 'jose' y hash de contraseñas con 'bcryptjs'
-// Roles: 'admin' (Nutriólogo) y 'paciente'
-// ============================================================================
 
 import { SignJWT, jwtVerify } from 'jose';
 import bcrypt from 'bcryptjs';
@@ -23,17 +18,14 @@ export interface SessionPayload {
   exp?: number;
 }
 
-// Generación de Hash de contraseña
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
 }
 
-// Verificación de contraseña contra hash
 export async function verifyPassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
 
-// Creación de token JWT firmado
 export async function createSessionToken(payload: Omit<SessionPayload, 'iat' | 'exp'>): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
@@ -42,7 +34,6 @@ export async function createSessionToken(payload: Omit<SessionPayload, 'iat' | '
     .sign(JWT_SECRET);
 }
 
-// Verificación y decodificación de token JWT
 export async function verifySessionToken(token: string): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
@@ -52,7 +43,6 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
   }
 }
 
-// Obtener sesión del usuario actual desde cookies del servidor
 export async function getCurrentSession(): Promise<SessionPayload | null> {
   try {
     const cookieStore = await cookies();

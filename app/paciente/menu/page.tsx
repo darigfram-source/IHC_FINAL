@@ -129,9 +129,6 @@ export default function PacienteMenuPage() {
       />
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* ==================================================================
-            1. TARJETA DE PERFIL DEL USUARIO (Adaptable)
-            ================================================================== */}
         <article
           aria-label="Información del perfil"
           className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col sm:flex-row sm:items-center justify-between gap-4"
@@ -170,9 +167,6 @@ export default function PacienteMenuPage() {
           </div>
         </article>
 
-        {/* ==================================================================
-            2. CONFIGURACIÓN DE TEMA (Requisito: Claro, Oscuro y Auto)
-            ================================================================== */}
         <section
           aria-label="Ajustes de apariencia"
           className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-4"
@@ -192,7 +186,6 @@ export default function PacienteMenuPage() {
               </div>
             </div>
 
-            {/* Segmented Control de Tema */}
             <ThemeToggle variant="segmented" />
           </div>
 
@@ -204,9 +197,6 @@ export default function PacienteMenuPage() {
           </div>
         </section>
 
-        {/* ==================================================================
-            3. BIBLIOTECA CIENTÍFICA (Artículos contra el "Bro-Science")
-            ================================================================== */}
         <section
           aria-label="Biblioteca científica"
           className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-4"
@@ -257,11 +247,7 @@ export default function PacienteMenuPage() {
           </div>
         </section>
 
-        {/* ==================================================================
-            4. REPORTES Y PRIVACIDAD DE SALUD
-            ================================================================== */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Reporte Periódico */}
           <div className="rounded-3xl p-5 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col justify-between space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-teal-500/15 text-teal-600 dark:text-teal-400 flex items-center justify-center">
@@ -282,7 +268,6 @@ export default function PacienteMenuPage() {
             </button>
           </div>
 
-          {/* Normativa LFPDPPP */}
           <div className="rounded-3xl p-5 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] flex flex-col justify-between space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-blue-500/15 text-blue-600 dark:text-blue-400 flex items-center justify-center">
@@ -304,9 +289,6 @@ export default function PacienteMenuPage() {
           </div>
         </div>
 
-        {/* ==================================================================
-            5. CERRAR SESIÓN
-            ================================================================== */}
         <button
           onClick={handleLogout}
           className="w-full py-3.5 px-6 rounded-2xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/60 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer min-h-[44px] focus-visible:outline-2 focus-visible:outline-rose-500"
@@ -316,7 +298,6 @@ export default function PacienteMenuPage() {
         </button>
       </div>
 
-      {/* MODAL ARTÍCULO EDUCATIVO */}
       {modalArticulo && (
         <div
           role="dialog"
@@ -364,7 +345,6 @@ export default function PacienteMenuPage() {
         </div>
       )}
 
-      {/* MODAL AVISO DE PRIVACIDAD */}
       {modalAviso && (
         <div
           role="dialog"

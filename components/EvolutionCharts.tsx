@@ -28,7 +28,6 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
 
   return (
     <div className="space-y-6">
-      {/* Selector de métricas */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Visualizar:</span>
@@ -68,7 +67,6 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
           </div>
         </div>
 
-        {/* Indicador de estado de progresión */}
         <div className="flex items-center gap-2 text-xs">
           <span className="text-slate-500">Diagnóstico actual:</span>
           <span
@@ -85,7 +83,6 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
         </div>
       </div>
 
-      {/* Alerta clínica si el peso sube pero las cargas no (Urdampilleta 2012) */}
       {usuario.estado === 'Peso sube, cargas no' && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-3.5 flex items-start gap-3">
           <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
@@ -98,7 +95,6 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
         </div>
       )}
 
-      {/* Gráfica 1: Peso en ayunas */}
       {(activeMetric === 'todos' || activeMetric === 'peso') && (
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
@@ -120,7 +116,6 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
             </div>
           </div>
 
-          {/* Gráfico SVG SVG Line Chart */}
           <div className="h-44 w-full pt-2">
             <svg viewBox="0 0 500 130" className="w-full h-full overflow-visible">
               <defs>
@@ -130,12 +125,10 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
                 </linearGradient>
               </defs>
 
-              {/* Guías */}
               <line x1="30" y1="20" x2="480" y2="20" stroke="#f1f5f9" strokeWidth="1" />
               <line x1="30" y1="60" x2="480" y2="60" stroke="#f1f5f9" strokeWidth="1" />
               <line x1="30" y1="100" x2="480" y2="100" stroke="#e2e8f0" strokeWidth="1" />
 
-              {/* Trazo */}
               {(() => {
                 const weights = sorted.map((s) => s.peso_ayunas);
                 const min = Math.min(...weights) - 0.5;
@@ -187,7 +180,6 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
         </div>
       )}
 
-      {/* Gráfica 2: Progresión de cargas (Sentadilla y Press de banca) */}
       {(activeMetric === 'todos' || activeMetric === 'cargas') && (
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">
@@ -214,7 +206,6 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
 
           <div className="h-44 w-full pt-2">
             <svg viewBox="0 0 500 130" className="w-full h-full overflow-visible">
-              {/* Guías */}
               <line x1="30" y1="20" x2="480" y2="20" stroke="#f1f5f9" strokeWidth="1" />
               <line x1="30" y1="60" x2="480" y2="60" stroke="#f1f5f9" strokeWidth="1" />
               <line x1="30" y1="100" x2="480" y2="100" stroke="#e2e8f0" strokeWidth="1" />
@@ -273,7 +264,6 @@ export const EvolutionCharts: React.FC<EvolutionChartsProps> = ({ usuario }) => 
         </div>
       )}
 
-      {/* Gráfica 3: Volumen de entrenamiento (kg totales acumulados por sesión) */}
       {(activeMetric === 'todos' || activeMetric === 'volumen') && (
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
           <div className="flex items-center justify-between mb-3">

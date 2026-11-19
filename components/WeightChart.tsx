@@ -29,7 +29,6 @@ export const WeightChart: React.FC<WeightChartProps> = ({
     );
   }
 
-  // Ordenar cronológicamente
   const sorted = [...registros].sort(
     (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
   );
@@ -56,13 +55,11 @@ export const WeightChart: React.FC<WeightChartProps> = ({
 
   const pathD = points.reduce((acc, curr, index) => {
     if (index === 0) return `M ${curr.x} ${curr.y}`;
-    // Curva suave
     const prev = points[index - 1];
     const cpX = (prev.x + curr.x) / 2;
     return `${acc} C ${cpX} ${prev.y}, ${cpX} ${curr.y}, ${curr.x} ${curr.y}`;
   }, '');
 
-  // Área sombreada debajo de la curva
   const areaD =
     points.length > 0
       ? `${pathD} L ${points[points.length - 1].x} ${height - paddingY} L ${points[0].x} ${height - paddingY} Z`
@@ -82,7 +79,6 @@ export const WeightChart: React.FC<WeightChartProps> = ({
           </linearGradient>
         </defs>
 
-        {/* Líneas guía horizontales */}
         <line
           x1={paddingX}
           y1={paddingY}
@@ -101,7 +97,6 @@ export const WeightChart: React.FC<WeightChartProps> = ({
           strokeWidth="1"
         />
 
-        {/* Línea de objetivo si existe */}
         {pesoObjetivo && pesoObjetivo >= minWeight && pesoObjetivo <= maxWeight && (
           <g>
             <line
@@ -116,10 +111,8 @@ export const WeightChart: React.FC<WeightChartProps> = ({
           </g>
         )}
 
-        {/* Área sombreada */}
         <path d={areaD} fill="url(#weightGradient)" />
 
-        {/* Curva principal */}
         <path
           d={pathD}
           fill="none"
@@ -129,7 +122,6 @@ export const WeightChart: React.FC<WeightChartProps> = ({
           strokeLinejoin="round"
         />
 
-        {/* Puntos interactivos */}
         {points.map((pt, i) => (
           <g key={i}>
             <circle
@@ -147,7 +139,6 @@ export const WeightChart: React.FC<WeightChartProps> = ({
         ))}
       </svg>
 
-      {/* Etiquetas mín/máx */}
       <div className="flex justify-between items-center text-[11px] text-slate-500 font-medium px-2 mt-1">
         <span>{sorted[0]?.fecha ? new Date(sorted[0].fecha).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' }) : 'Inicio'}</span>
         <span className="text-emerald-700 font-semibold">
@@ -156,7 +147,6 @@ export const WeightChart: React.FC<WeightChartProps> = ({
         <span>{sorted[sorted.length - 1]?.fecha ? new Date(sorted[sorted.length - 1].fecha).toLocaleDateString('es-MX', { month: 'short', day: 'numeric' }) : 'Hoy'}</span>
       </div>
 
-      {/* Tooltip flotante */}
       {hoveredPoint && (
         <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-slate-900/90 text-white text-[11px] px-2.5 py-1 rounded shadow-md pointer-events-none flex gap-2 items-center">
           <span className="text-emerald-400 font-bold">{hoveredPoint.peso_ayunas} kg</span>

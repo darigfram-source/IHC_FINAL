@@ -22,7 +22,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [mounted, setMounted] = useState(false);
   const [, startTransition] = useTransition();
 
-  // Inicializar leyendo localStorage o por defecto 'system'
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
@@ -30,12 +29,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setThemeState(stored);
       }
     } catch {
-      // Ignorar errores de localStorage
     }
     setMounted(true);
   }, []);
 
-  // Aplicar tema al DOM y escuchar cambios del sistema
   useEffect(() => {
     if (!mounted) return;
 
@@ -78,7 +75,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       try {
         localStorage.setItem(STORAGE_KEY, newTheme);
       } catch {
-        // Ignorar errores de almacenamiento
       }
     });
   };

@@ -113,32 +113,25 @@ export default function PacienteDashboardPage() {
   const diffPeso = Math.abs(objetivo - peso).toFixed(1);
   const faltaSubir = objetivo >= peso;
 
-  // Cálculos científicos según PDF (1.6 - 1.8 g/kg y +400 a +500 kcal)
   const proteinaGramosMin = Math.round(peso * 1.6);
   const proteinaGramosMax = Math.round(peso * 1.8);
   const proteinaActualPrescrita = Math.round(peso * (paciente.proteina_g_kg || 1.75));
 
-  // Comprobar si ya registró hoy
   const registroHoy = paciente.registros?.find((r) => r.fecha === fechaHoyStr);
 
-  // Último mensaje del nutriólogo
   const ultimoMensaje = paciente.mensajes?.slice(-1)[0];
 
-  // Cálculo de progreso porcentual
   const porcentajeProgreso = Math.min(100, Math.max(10, Math.round((peso / objetivo) * 100)));
 
   return (
     <div className="w-full min-h-full">
-      {/* Encabezado Superior Adaptable */}
       <PacienteTopBar
         titulo={`Hola, ${paciente.nombre.split(' ')[0]}`}
         subtitulo={fechaFormateada ? `Hoy es ${fechaFormateada}` : 'Plan de hipertrofia activo'}
         badge="Plan Activo"
       />
 
-      {/* Contenedor Centrado y Fluido (max-w-7xl, clamp de padding) */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* BANNER DE BIENVENIDA / HERO FLUIDO */}
         <section
           aria-label="Resumen de bienvenida"
           className="rounded-3xl p-5 sm:p-6 lg:p-8 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white shadow-lg shadow-emerald-950/20 relative overflow-hidden"
@@ -175,22 +168,11 @@ export default function PacienteDashboardPage() {
             </div>
           </div>
 
-          {/* Adorno visual de fondo */}
           <div className="absolute -right-8 -bottom-12 w-64 h-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
         </section>
 
-        {/* ====================================================================
-            LAYOUT GRID RESPONSIVO:
-            - Móvil (<640px): 1 columna apilada
-            - Tablet (640-1024px): 2 columnas
-            - Escritorio (>1024px): 12 columnas (8 col principal, 4 col lateral)
-            ==================================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* ================================================================
-              COLUMNA PRINCIPAL (lg:col-span-8)
-              ================================================================ */}
           <div className="lg:col-span-8 space-y-6">
-            {/* 1. TARJETA: COMPOSICIÓN CORPORAL (Figura 3) */}
             <article
               aria-label="Composición Corporal"
               className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] hover:border-[var(--primary)] transition-all"
@@ -225,7 +207,6 @@ export default function PacienteDashboardPage() {
                 </div>
               </div>
 
-              {/* Grid 2 columnas para Peso Actual y Peso Objetivo */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
                 <div className="p-4 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-subtle)]">
                   <span className="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider block">
@@ -259,7 +240,6 @@ export default function PacienteDashboardPage() {
                 </div>
               </div>
 
-              {/* Barra de Progreso Accesible */}
               <div className="space-y-1.5">
                 <div className="flex justify-between text-xs font-semibold text-[var(--text-muted)]">
                   <span>Progreso hacia objetivo magro</span>
@@ -281,7 +261,6 @@ export default function PacienteDashboardPage() {
               </div>
             </article>
 
-            {/* 2. TARJETA: PRESCRIPCIÓN DEL DÍA (4 Subtarjetas en Grid Adaptable) */}
             <article
               aria-label="Prescripción nutricional del día"
               className="rounded-3xl p-5 sm:p-6 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-5"
@@ -306,9 +285,7 @@ export default function PacienteDashboardPage() {
                 </span>
               </div>
 
-              {/* Grid de 4 Métricas (1 col en móvil pequeño, 2 en tablet, 4 en desktop) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* 1. Proteína Diaria */}
                 <div className="p-4 rounded-2xl bg-[var(--primary-surface)] border border-[var(--primary-border)] space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--primary-text)]">
@@ -324,7 +301,6 @@ export default function PacienteDashboardPage() {
                   </p>
                 </div>
 
-                {/* 2. Superávit Calórico */}
                 <div className="p-4 rounded-2xl bg-[var(--warning-surface)] border border-[var(--warning-border)] space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--warning-text)]">
@@ -340,7 +316,6 @@ export default function PacienteDashboardPage() {
                   </p>
                 </div>
 
-                {/* 3. Hidratación */}
                 <div className="p-4 rounded-2xl bg-[var(--cyan-surface)] border border-[var(--cyan-border)] space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--cyan-text)]">
@@ -356,7 +331,6 @@ export default function PacienteDashboardPage() {
                   </p>
                 </div>
 
-                {/* 4. Creatina */}
                 <div className="p-4 rounded-2xl bg-[var(--purple-surface)] border border-[var(--purple-border)] space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--purple-text)]">
@@ -373,7 +347,6 @@ export default function PacienteDashboardPage() {
                 </div>
               </div>
 
-              {/* Guía Informativa */}
               <div className="p-3.5 rounded-2xl bg-[var(--surface-raised)] border border-[var(--border-subtle)] flex items-start gap-3 text-xs text-[var(--text-muted)]">
                 <AlertCircle className="w-4 h-4 text-[var(--primary)] shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
@@ -383,11 +356,7 @@ export default function PacienteDashboardPage() {
             </article>
           </div>
 
-          {/* ================================================================
-              COLUMNA LATERAL (lg:col-span-4)
-              ================================================================ */}
           <div className="lg:col-span-4 space-y-6">
-            {/* 1. BANNER: REGISTRO PENDIENTE O COMPLETADO */}
             <article
               aria-label="Estado del registro diario"
               className="rounded-3xl p-5 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-3"
@@ -444,7 +413,6 @@ export default function PacienteDashboardPage() {
               )}
             </article>
 
-            {/* 2. TARJETA: MENSAJE DEL ESPECIALISTA (Figura 3) */}
             <article
               aria-label="Mensaje del especialista"
               className="rounded-3xl p-5 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-3"
@@ -486,7 +454,6 @@ export default function PacienteDashboardPage() {
               </div>
             </article>
 
-            {/* 3. TARJETA: ACCESOS RÁPIDOS Y REPORTE */}
             <article
               aria-label="Acciones rápidas"
               className="rounded-3xl p-5 bg-[var(--surface)] border border-[var(--border)] shadow-[var(--shadow-sm)] space-y-3"

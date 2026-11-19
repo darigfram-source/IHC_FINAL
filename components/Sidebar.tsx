@@ -42,17 +42,14 @@ export const Sidebar: React.FC = () => {
     }
   };
 
-  // Contar mensajes no leídos del nutriólogo
   const unreadMessagesCount = mensajes.filter(
     (m) => m.remitente === 'usuario' && !m.leido
   ).length;
 
-  // Contar alertas en usuarios
   const alertCount = usuarios.filter((u) => u.estado !== 'En progreso').length;
 
   return (
     <aside className="w-64 bg-[#0a1a14] text-white flex flex-col h-screen select-none shrink-0 border-r border-[#153428] shadow-xl">
-      {/* Brand Header */}
       <div className="p-5 border-b border-[#16382a] bg-gradient-to-b from-[#0f281e] to-[#0a1a14]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-950/50 border border-emerald-400/30">
@@ -70,15 +67,11 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
 
-
-
-      {/* Navigation Sections */}
       <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         <div className="px-3 pb-2 text-[10px] font-bold uppercase tracking-widest text-emerald-300/50">
           Panel
         </div>
 
-        {/* 1. Usuarios */}
         <button
           onClick={() => setActiveTab('usuarios')}
           className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
@@ -104,7 +97,6 @@ export const Sidebar: React.FC = () => {
           )}
         </button>
 
-        {/* 2. Mensajes */}
         <button
           onClick={() => setActiveTab('mensajes')}
           className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
@@ -124,7 +116,6 @@ export const Sidebar: React.FC = () => {
           )}
         </button>
 
-        {/* 3. Reportes */}
         <button
           onClick={() => setActiveTab('reportes')}
           className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
@@ -140,7 +131,6 @@ export const Sidebar: React.FC = () => {
           <span className="text-[10px] text-emerald-300/40 font-semibold">PDF</span>
         </button>
 
-        {/* 4. Biblioteca */}
         <button
           onClick={() => setActiveTab('biblioteca')}
           className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition-all ${
@@ -156,7 +146,6 @@ export const Sidebar: React.FC = () => {
           <span className="text-[10px] text-emerald-300/60 font-semibold">Ciencia</span>
         </button>
 
-        {/* Sección de cumplimiento normativo */}
         <div className="pt-6 pb-2 px-3 text-[10px] font-bold uppercase tracking-widest text-emerald-300/50">
           Normativa de Salud
         </div>
@@ -169,7 +158,6 @@ export const Sidebar: React.FC = () => {
         </button>
       </div>
 
-      {/* Footer del Nutriólogo (Actualizado a Nutriólogo Admin y CED-ADMIN-001) */}
       <div className="p-3.5 border-t border-[#16382a] bg-[#0c1f18]">
         <div className="flex items-center gap-3 mb-3 p-2 bg-[#122e23] rounded-lg border border-[#1b4333]">
           <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-bold text-xs border border-emerald-400/30">

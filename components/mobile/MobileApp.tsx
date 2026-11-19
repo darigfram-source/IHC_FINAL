@@ -36,16 +36,13 @@ export const MobileApp: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'inicio' | 'registro' | 'graficas' | 'chat' | 'menu'>('inicio');
   const [isElegibilidadOpen, setIsElegibilidadOpen] = useState(false);
 
-  // Mensajes no leídos del nutriólogo para el paciente activo
   const unreadCount = mensajes.filter(
     (m) => m.usuario_id === activePatientId && m.remitente === 'nutriologo' && !m.leido
   ).length;
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center justify-start p-0 sm:py-6">
-      {/* Barra de Controles Superiores para Escritorio (Switcher de rol y selector de paciente) */}
       <div className="w-full max-w-md px-4 mb-3 flex items-center justify-between text-xs select-none">
-        {/* Switcher a Panel de Escritorio */}
         <Link
           href="/"
           className="flex items-center gap-1.5 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 px-3 py-1.5 rounded-full font-bold transition-all"
@@ -54,7 +51,6 @@ export const MobileApp: React.FC = () => {
           <span>Panel Nutriólogo (Web)</span>
         </Link>
 
-        {/* Selector de Paciente para Pruebas */}
         <div className="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full">
           <span className="text-[10px] text-slate-400">Paciente:</span>
           <select
@@ -71,9 +67,7 @@ export const MobileApp: React.FC = () => {
         </div>
       </div>
 
-      {/* Contenedor del Móvil (Smartphone Mockup) */}
       <div className="w-full max-w-md bg-slate-50 text-slate-900 sm:rounded-3xl shadow-2xl sm:border sm:border-slate-300 overflow-hidden flex flex-col min-h-screen sm:min-h-[740px] sm:max-h-[820px]">
-        {/* Barra de Estado Móvil */}
         <div className="h-6 bg-slate-100 px-5 flex items-center justify-between text-[11px] font-bold text-slate-600 select-none border-b border-slate-200">
           <span>9:41</span>
           <div className="flex items-center gap-2">
@@ -82,7 +76,6 @@ export const MobileApp: React.FC = () => {
           </div>
         </div>
 
-        {/* Pantalla Activa con Scroll */}
         <div className="flex-1 overflow-y-auto">
           {activeTab === 'inicio' && (
             <MobileInicio
@@ -104,9 +97,7 @@ export const MobileApp: React.FC = () => {
           )}
         </div>
 
-        {/* Barra de Navegación Inferior (Fiel a Figuras 3 a 7: Inicio, Registro, Gráficas, Chat, Menú) */}
         <nav className="h-16 bg-white border-t border-slate-200 flex items-center justify-around px-2 shrink-0 select-none z-20">
-          {/* 1. Inicio */}
           <button
             onClick={() => setActiveTab('inicio')}
             className={`flex flex-col items-center justify-center w-14 py-1 transition-all ${
@@ -117,7 +108,6 @@ export const MobileApp: React.FC = () => {
             <span className="text-[10px]">Inicio</span>
           </button>
 
-          {/* 2. Registro */}
           <button
             onClick={() => setActiveTab('registro')}
             className={`flex flex-col items-center justify-center w-14 py-1 transition-all ${
@@ -128,7 +118,6 @@ export const MobileApp: React.FC = () => {
             <span className="text-[10px]">Registro</span>
           </button>
 
-          {/* 3. Gráficas */}
           <button
             onClick={() => setActiveTab('graficas')}
             className={`flex flex-col items-center justify-center w-14 py-1 transition-all ${
@@ -139,7 +128,6 @@ export const MobileApp: React.FC = () => {
             <span className="text-[10px]">Gráficas</span>
           </button>
 
-          {/* 4. Chat */}
           <button
             onClick={() => setActiveTab('chat')}
             className={`flex flex-col items-center justify-center w-14 py-1 transition-all relative ${
@@ -155,7 +143,6 @@ export const MobileApp: React.FC = () => {
             <span className="text-[10px]">Chat</span>
           </button>
 
-          {/* 5. Menú */}
           <button
             onClick={() => setActiveTab('menu')}
             className={`flex flex-col items-center justify-center w-14 py-1 transition-all ${
@@ -168,7 +155,6 @@ export const MobileApp: React.FC = () => {
         </nav>
       </div>
 
-      {/* Modales */}
       <MobileElegibilidadModal
         isOpen={isElegibilidadOpen}
         onClose={() => setIsElegibilidadOpen(false)}

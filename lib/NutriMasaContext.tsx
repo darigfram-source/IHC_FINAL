@@ -25,7 +25,6 @@ interface NutriMasaContextType {
   selectedUsuarioId: string;
   setSelectedUsuarioId: (id: string) => void;
   
-  // Paciente activo en la App Móvil
   activePatientId: string;
   setActivePatientId: (id: string) => void;
   activePatient: Usuario | null;
@@ -36,7 +35,6 @@ interface NutriMasaContextType {
   activeTab: 'usuarios' | 'mensajes' | 'reportes' | 'biblioteca';
   setActiveTab: (tab: 'usuarios' | 'mensajes' | 'reportes' | 'biblioteca') => void;
   
-  // Modales
   isDetailModalOpen: boolean;
   setIsDetailModalOpen: (open: boolean) => void;
   isAdjustModalOpen: boolean;
@@ -48,7 +46,6 @@ interface NutriMasaContextType {
   isReportModalOpen: boolean;
   setIsReportModalOpen: (open: boolean) => void;
   
-  // Acciones
   updatePlan: (data: {
     usuarioId: string;
     superavit_kcal: number;
@@ -65,7 +62,6 @@ interface NutriMasaContextType {
   agregarArticulo: (articulo: Omit<ArticuloEducativo, 'id' | 'creado_en'>) => void;
   generarReporte: (reporte: Omit<Reporte, 'id' | 'creado_en' | 'nutriologo_id'>) => Reporte;
   
-  // Auth
   isAuthenticated: boolean;
   login: (email: string, role: 'nutriologo' | 'usuario') => boolean;
   logout: () => void | Promise<void>;
@@ -87,14 +83,12 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [reportes, setReportes] = useState<Reporte[]>(INITIAL_REPORTES);
   const [activeTab, setActiveTab] = useState<'usuarios' | 'mensajes' | 'reportes' | 'biblioteca'>('usuarios');
 
-  // Modales
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isAdjustModalOpen, setIsAdjustModalOpen] = useState(false);
   const [isNewArticleModalOpen, setIsNewArticleModalOpen] = useState(false);
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
-  // Carga inicial de localStorage para persistencia
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -114,7 +108,6 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, []);
 
-  // Guardado automático en localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
@@ -136,7 +129,6 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const selectedUsuario = usuarios.find((u) => u.id === selectedUsuarioId) || usuarios[0] || null;
   const activePatient = usuarios.find((u) => u.id === activePatientId) || usuarios[0] || null;
 
-  // Registrar un nuevo día desde la vista móvil del paciente y actualizar métricas dinámicamente
   const agregarRegistroDiario = (
     usuarioId: string,
     registroData: Omit<RegistroDiario, 'id' | 'usuario_id'>
@@ -154,7 +146,6 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         const registrosActuales = user.registros || [];
         const ultRegPrevio = registrosActuales[registrosActuales.length - 1];
 
-        // Comparar progresión de cargas
         let tendencia = user.tendencia_cargas;
         if (ultRegPrevio) {
           const sentadillaSubio = nuevoRegistro.sentadilla_kg > ultRegPrevio.sentadilla_kg;
@@ -170,7 +161,6 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           }
         }
 
-        // Evaluar estado clínico
         let nuevoEstado = user.estado;
         const pesoSubio = nuevoRegistro.peso_ayunas > user.peso_actual;
         if (pesoSubio && tendencia === 'Sin cambio') {
@@ -181,7 +171,6 @@ export const NutriMasaProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           nuevoEstado = 'Estancado';
         }
 
-        // Recalcular dinámicamente según el nuevo peso en ayunas
         const nuevoPeso = nuevoRegistro.peso_ayunas;
 
         return {

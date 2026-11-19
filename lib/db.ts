@@ -1,13 +1,8 @@
-// ============================================================================
-// CONEXIÓN A BASE DE DATOS Y CONSULTAS: NUTRIMASA
-// Compatible con Vercel Postgres, Neon y Supabase
-// ============================================================================
 
 import { Pool } from 'pg';
 import { neon } from '@neondatabase/serverless';
 import { INITIAL_USUARIOS, INITIAL_MENSAJES, INITIAL_ARTICULOS, INITIAL_REPORTES } from './data/initialData';
 
-// Cadena de conexión
 const connectionString =
   process.env.DATABASE_URL ||
   process.env.POSTGRES_URL ||
@@ -35,13 +30,8 @@ export async function query(text: string, params: any[] = []): Promise<any> {
     }
   }
 
-  // Si no hay conexión configurada, retornar array vacío para evitar caídas
   return [];
 }
-
-// ============================================================================
-// CONSULTAS DEL PACIENTE (Segregadas por ID)
-// ============================================================================
 
 export async function getPatientCompleteData(usuarioId: string) {
   if (hasDbConnection()) {
@@ -80,7 +70,6 @@ export async function getPatientCompleteData(usuarioId: string) {
     }
   }
 
-  // Fallback si la BD no está aún vinculada
   const fallback = INITIAL_USUARIOS.find((u) => u.id === usuarioId || u.email.includes(usuarioId)) || INITIAL_USUARIOS[1];
   const msgs = INITIAL_MENSAJES.filter((m) => m.usuario_id === fallback.id);
   const reps = INITIAL_REPORTES.filter((r) => r.usuario_id === fallback.id);
@@ -109,7 +98,6 @@ export async function insertDailyLog(usuarioId: string, logData: {
 
   if (hasDbConnection()) {
     try {
-      // 1. Insertar o actualizar registro del día
       await query(
         `INSERT INTO registros_diarios (
           id, usuario_id, fecha, peso_ayunas, sentadilla_kg, press_banca_kg,
@@ -140,7 +128,6 @@ export async function insertDailyLog(usuarioId: string, logData: {
         ]
       );
 
-      // 2. Actualizar el peso_actual en perfiles_paciente
       await query(
         `UPDATE perfiles_paciente
          SET peso_actual = $1, actualizado_en = CURRENT_TIMESTAMP
@@ -157,10 +144,6 @@ export async function insertDailyLog(usuarioId: string, logData: {
   return { success: true, id: logId };
 }
 
-// ============================================================================
-// CONSULTAS DEL NUTRIÓLOGO (ADMIN)
-// ============================================================================
-
 export async function getAllPatients() {
   if (hasDbConnection()) {
     try {
@@ -172,7 +155,6 @@ export async function getAllPatients() {
         ORDER BY u.creado_en ASC
       `);
 
-      // Cargar registros para cada paciente
       const results = await Promise.all(
         users.map(async (u: any) => {
           const logs = await query(

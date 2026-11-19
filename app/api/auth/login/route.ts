@@ -31,7 +31,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // Fallback con credenciales oficiales documentadas
     if (!user) {
       if (cleanEmail === 'admin@nutrimasa.com' && (password === 'Password123!' || password === '12345678')) {
         user = {
@@ -71,7 +70,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Si se especificó un rol esperado, validar coherencia
     if (expectedRole && user.rol !== expectedRole) {
       const msg =
         expectedRole === 'admin'
@@ -80,7 +78,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: msg }, { status: 403 });
     }
 
-    // Generar JWT
     const token = await createSessionToken({
       userId: user.id,
       email: user.email,
@@ -99,13 +96,12 @@ export async function POST(request: Request) {
       redirectTo: user.rol === 'admin' ? '/admin' : '/paciente/dashboard',
     });
 
-    // Establecer Cookie HTTP-Only Segura
     response.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 7 * 24 * 60 * 60, // 7 días
+      maxAge: 7 * 24 * 60 * 60,
     });
 
     return response;

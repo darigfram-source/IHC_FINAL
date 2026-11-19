@@ -111,7 +111,6 @@ function AdminLoginForm() {
           <ArrowRight className="w-4 h-4" />
         </button>
 
-        {/* Acceso Rápido Demo */}
         <button
           type="button"
           onClick={handleQuickLogin}
@@ -123,7 +122,6 @@ function AdminLoginForm() {
         </button>
       </form>
 
-      {/* Enlace a Portal de Paciente */}
       <div className="mt-6 pt-4 border-t border-slate-100 text-center">
         <p className="text-xs text-slate-500">
           ¿Eres paciente?{' '}
@@ -140,7 +138,6 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#06140e] via-[#0b241a] to-[#040e0a] flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl border border-emerald-950/20 overflow-hidden">
-        {/* Banner Superior */}
         <div className="p-8 bg-gradient-to-b from-[#0a1f16] to-[#102d21] text-white text-center border-b border-[#184231] relative">
           <Link
             href="/"
@@ -159,7 +156,6 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        {/* Formulario envuelto en Suspense */}
         <Suspense fallback={<div className="p-8 text-center text-xs text-slate-500">Cargando formulario de acceso...</div>}>
           <AdminLoginForm />
         </Suspense>

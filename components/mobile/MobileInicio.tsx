@@ -27,21 +27,17 @@ export const MobileInicio: React.FC<MobileInicioProps> = ({
 
   if (!activePatient) return null;
 
-  // Gramos calculados de proteína diarios basados en el peso actual
   const gramosProteina = Math.round(activePatient.proteina_g_kg * activePatient.peso_actual);
 
-  // Último mensaje del nutriólogo
   const ultimoMensajeNutri = mensajes
     .filter((m) => m.usuario_id === activePatient.id && m.remitente === 'nutriologo')
     .slice(-1)[0];
 
-  // Cálculo de progreso hacia la meta
   const progresoKg = (activePatient.peso_actual - activePatient.peso_inicial).toFixed(1);
   const faltaKg = (activePatient.peso_objetivo - activePatient.peso_actual).toFixed(1);
 
   return (
     <div className="p-4 space-y-4 text-slate-800">
-      {/* Saludo (Fiel a Figura 3: "Hola, [Nombre]") */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-black text-slate-900 tracking-tight">
@@ -59,7 +55,6 @@ export const MobileInicio: React.FC<MobileInicioProps> = ({
         </button>
       </div>
 
-      {/* Banner Superior Verde (Figura 3: "Tu registro de hoy está pendiente" [Registrar ahora]) */}
       <div className="bg-[#14532d] text-white p-4 rounded-2xl shadow-md border border-emerald-800 flex items-center justify-between">
         <div>
           <p className="font-bold text-xs text-emerald-100">Tu registro de hoy está pendiente</p>
@@ -73,7 +68,6 @@ export const MobileInicio: React.FC<MobileInicioProps> = ({
         </button>
       </div>
 
-      {/* Tarjeta de Peso Actual vs Meta (Figura 3: 78.4 kg - 80 kg) */}
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
@@ -100,7 +94,6 @@ export const MobileInicio: React.FC<MobileInicioProps> = ({
         </div>
       </div>
 
-      {/* Tarjeta Plan de hoy (Figura 3: Proteína 1.6 a 1.8 g/kg, Superávit +400 a 500 kcal) */}
       <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-extrabold text-slate-900 uppercase tracking-wide">
@@ -139,7 +132,6 @@ export const MobileInicio: React.FC<MobileInicioProps> = ({
         </div>
       </div>
 
-      {/* Aviso de Mensaje del Nutriólogo (Figura 3: "Tu nutriólogo respondió" [Ver]) */}
       {ultimoMensajeNutri && (
         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between shadow-2xs">
           <div className="flex items-center gap-2.5 overflow-hidden pr-2">
@@ -162,7 +154,6 @@ export const MobileInicio: React.FC<MobileInicioProps> = ({
         </div>
       )}
 
-      {/* Botones de Acceso Rápido (Figura 3: [Metas] [Biblioteca]) */}
       <div className="grid grid-cols-2 gap-3 pt-1">
         <button
           onClick={() => onNavigateTab('graficas')}
